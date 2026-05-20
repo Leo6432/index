@@ -383,7 +383,8 @@
     <div style="position:relative;margin-bottom:14px">
       <pre id="script-code" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.72rem;overflow-x:auto;line-height:1.6;color:var(--text)">function doGet(e) {
   var url = e.parameter.url;
-  if (!url) return json({status:'error',msg:'no url'});
+  var cb  = e.parameter.callback || 'callback';
+  if (!url) return jsonp(cb, {status:'error', msg:'no url'});
   try {
     var res = UrlFetchApp.fetch(
       'https://www.google.com/search?q=site:' + encodeURIComponent(url) + '&num=1&hl=fr',
@@ -391,16 +392,16 @@
         followRedirects: true, muteHttpExceptions: true }
     );
     var html = res.getContentText();
-    var noResult = /did not match any documents|n.a pas renvoy|aucun r.sultat|aucun document/i.test(html);
-    var hasResult = /id="result-stats"|class="LC20lb|Environ.*r.sultat|About.*result/i.test(html);
-    return json({status: noResult ? 'not-indexed' : hasResult ? 'indexed' : 'error'});
+    var no  = /did not match any documents|n.a pas renvoy|aucun r.sultat|aucun document/i.test(html);
+    var yes = /id="result-stats"|class="LC20lb|Environ.*r.sultat|About.*result/i.test(html);
+    return jsonp(cb, {status: no ? 'not-indexed' : yes ? 'indexed' : 'error'});
   } catch(err) {
-    return json({status:'error', msg: err.message});
+    return jsonp(cb, {status:'error', msg: err.message});
   }
 }
-function json(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+function jsonp(cb, obj) {
+  return ContentService.createTextOutput(cb + '(' + JSON.stringify(obj) + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }</pre>
       <button class="btn btn-outline btn-sm" id="btn-copy-script" style="position:absolute;top:8px;right:8px">Copier</button>
     </div>
@@ -698,20 +699,46 @@ function json(obj) {
     dNot.setAttribute('stroke-dashoffset', `-${idxArc}`);
   }
 
-  // ── Apps Script check ─────────────────────────────────────────────────────
-  async function checkViaGoogleApi(pageUrl) {
-    if (!hasApi()) return { status: 'error' };
-    const url = cfg.scriptUrl + '?url=' + encodeURIComponent(pageUrl);
-    try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(20000) });
-      const d = await r.json();
-      if (d.status === 'indexed' || d.status === 'not-indexed') return d;
-      showApiError(d.msg || 'Réponse inattendue du script');
-      return { status: 'error' };
-    } catch (e) {
-      showApiError('Script inaccessible : ' + e.message);
-      return { status: 'error' };
-    }
+  // ── Apps Script check via JSONP (bypasses CORS entirely) ─────────────────
+  function checkViaGoogleApi(pageUrl) {
+    if (!hasApi()) return Promise.resolve({ status: 'error' });
+
+    return new Promise(resolve => {
+      const cbName = '_seo_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
+      const timer = setTimeout(() => {
+        cleanup();
+        showApiError('Timeout — vérifiez l\'URL du script dans ⚙');
+        resolve({ status: 'error' });
+      }, 25000);
+
+      function cleanup() {
+        clearTimeout(timer);
+        delete window[cbName];
+        const s = document.getElementById(cbName);
+        if (s) s.remove();
+      }
+
+      window[cbName] = data => {
+        cleanup();
+        if (data.status === 'indexed' || data.status === 'not-indexed') {
+          resolve(data);
+        } else {
+          showApiError(data.msg || 'Réponse inattendue du script');
+          resolve({ status: 'error' });
+        }
+      };
+
+      const script = document.createElement('script');
+      script.id  = cbName;
+      script.src = cfg.scriptUrl + '?url=' + encodeURIComponent(pageUrl) + '&callback=' + cbName;
+      script.onerror = () => {
+        cleanup();
+        showApiError('Script inaccessible — vérifiez l\'URL dans ⚙');
+        resolve({ status: 'error' });
+      };
+      document.head.appendChild(script);
+    });
   }
 
   function showApiError(msg) {
