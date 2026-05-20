@@ -373,11 +373,13 @@
     <div class="steps">
       <strong>1.</strong> Créez une clé API sur
       <a href="https://console.cloud.google.com/apis/credentials" target="_blank">console.cloud.google.com</a>
-      → activer <em>Custom Search API</em><br>
-      <strong>2.</strong> Créez un moteur de recherche sur
+      → <em>+ Créer des identifiants → Clé API</em>, puis activez <em>Custom Search API</em> dans la bibliothèque<br>
+      <strong>2.</strong> Créez un moteur sur
       <a href="https://programmablesearchengine.google.com/" target="_blank">programmablesearchengine.google.com</a><br>
-      <strong>3.</strong> Dans les paramètres du moteur, activez <em>"Rechercher sur tout le web"</em><br>
-      <strong>4.</strong> Copiez l'<em>ID du moteur (cx)</em> et collez-le ci-dessous
+      <strong>3.</strong> Dans <em>"Sites à rechercher"</em>, ajoutez <strong>votre ou vos domaines</strong>
+      (ex : <code>monsite.com</code>). Google a supprimé "tout le web" — c'est inutile, vos propres domaines suffisent.<br>
+      <strong>4.</strong> L'<em>ID du moteur (cx)</em> est visible dans le code d'intégration :
+      <code>&lt;script … cx=<strong>VOTRE_ID</strong>"&gt;</code>
     </div>
 
     <div class="field-group">
@@ -538,7 +540,7 @@
     if (hasApi()) {
       badge.className = 'api-badge ok';
       label.textContent = 'API Google active';
-      notice.innerHTML = '<strong>API Google Custom Search active.</strong> 100 requêtes gratuites/jour. Cliquez sur une ligne pour voir la page sur Google.';
+      notice.innerHTML = '<strong>API Google Custom Search active.</strong> 100 requêtes gratuites/jour. Ajoutez vos domaines dans le moteur CSE. Cliquez une ligne pour vérifier sur Google.';
     } else {
       badge.className = 'api-badge warn';
       label.textContent = 'API non configurée';
