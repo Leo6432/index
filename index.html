@@ -656,25 +656,50 @@
   }
 
   // ── Detect indexation ─────────────────────────────────────────────────────
+  // Strict: only return 'indexed' on a strong unambiguous signal.
+  // Prefer 'error' over a false positive.
   function detectStatus({ html, engine }) {
     if (engine === 'bing') {
-      const NO  = [/no results found/i, /there are no results for/i, /didn.t match any results/i,
-                   /aucun r[eé]sultat/i, /class="b_no"/, /keine Ergebnisse/i];
-      const YES = [/class="b_algo"/, /<li[^>]+b_algo/, /b_results/, /SW_ReAn/];
+      // Strong "no results" signals from Bing
+      const NO = [
+        /no results found/i,
+        /there are no results for/i,
+        /didn.t match any results/i,
+        /aucun r[eé]sultat/i,
+        /keine Ergebnisse/i,
+        /class="b_no"/,
+        /id="b_results"[^>]*>[\s\S]{0,200}class="b_no"/,
+      ];
+      // Strong "has results" signal: Bing wraps each result in class="b_algo"
+      // This is specific enough — navigation/footer never use this class
+      const YES = [/class="b_algo"/, /b_attribution/];
+
       for (const p of NO)  if (p.test(html)) return 'not-indexed';
       for (const p of YES) if (p.test(html)) return 'indexed';
-      // Bing heuristic: has list items with results
-      if (html.includes('<li') && html.includes('href')) return 'indexed';
     } else {
-      const NO  = [/did not match any documents/i, /n['']a pas renvoy[eé]/i,
-                   /aucun r[eé]sultat/i, /aucun document/i, /no results found/i,
-                   /did not match/i, /keine.*ergebnisse/i];
-      const YES = [/result-stats/i, /resultStats/i, /About [\d, ]+result/i,
-                   /Environ [\d\s]+r[eé]sultat/i, /"sitelinks"/, /LC20lb/];
+      // Google
+      const NO = [
+        /did not match any documents/i,
+        /n['']a pas renvoy[eé]/i,
+        /aucun r[eé]sultat/i,
+        /aucun document/i,
+        /no results found/i,
+        /did not match/i,
+        /keine.*ergebnisse/i,
+      ];
+      // Strong Google signals: result-stats div or specific result class
+      const YES = [
+        /id="result-stats"/,
+        /class="[^"]*LC20lb[^"]*"/,
+        /Environ <b>[\d\s]+<\/b> r[eé]sultat/i,
+        /About <b>[\d,]+<\/b> result/i,
+      ];
+
       for (const p of NO)  if (p.test(html)) return 'not-indexed';
       for (const p of YES) if (p.test(html)) return 'indexed';
-      if (html.includes('data-ved') && html.includes('<a href')) return 'indexed';
     }
+
+    // Ambiguous response (CAPTCHA, redirect, incomplete) → don't guess
     return 'error';
   }
 
