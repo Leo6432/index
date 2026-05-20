@@ -15,6 +15,7 @@
       --accent: #6c63ff;
       --accent2: #00d4aa;
       --danger: #ff5c72;
+      --warn: #f59e0b;
       --text: #e2e8f0;
       --muted: #8892b0;
       --radius: 12px;
@@ -28,11 +29,15 @@
       padding: 24px;
     }
 
+    /* ── Header ── */
     header {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 32px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     header .logo {
@@ -40,12 +45,38 @@
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
+      font-size: 20px; flex-shrink: 0;
     }
 
     header h1 { font-size: 1.5rem; font-weight: 700; }
-    header p { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+    header p  { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
 
+    .api-badge {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .api-badge:hover { border-color: var(--accent); }
+    .api-badge .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .api-badge.ok   .dot { background: var(--accent2); }
+    .api-badge.warn .dot { background: var(--warn); }
+    .api-badge.ok   .api-label { color: var(--accent2); }
+    .api-badge.warn .api-label { color: var(--warn); }
+
+    /* ── Grid ── */
     .grid {
       display: grid;
       grid-template-columns: 1fr 340px;
@@ -53,18 +84,15 @@
       max-width: 1200px;
       margin: 0 auto;
     }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
-    @media (max-width: 900px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-
+    /* ── Card ── */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 24px;
     }
-
     .card h2 {
       font-size: 1rem;
       font-weight: 600;
@@ -74,14 +102,13 @@
       letter-spacing: 0.05em;
     }
 
-    /* URL Input */
+    /* ── Inputs ── */
     .input-row {
       display: flex;
       gap: 8px;
       margin-bottom: 12px;
     }
-
-    .input-row input {
+    .input-row input, .field-input {
       flex: 1;
       background: var(--card2);
       border: 1px solid var(--border);
@@ -91,11 +118,12 @@
       font-size: 0.9rem;
       outline: none;
       transition: border-color 0.2s;
+      width: 100%;
     }
+    .input-row input:focus, .field-input:focus { border-color: var(--accent); }
+    .input-row input::placeholder, .field-input::placeholder { color: var(--muted); }
 
-    .input-row input:focus { border-color: var(--accent); }
-    .input-row input::placeholder { color: var(--muted); }
-
+    /* ── Buttons ── */
     .btn {
       background: var(--accent);
       color: #fff;
@@ -108,282 +136,240 @@
       transition: opacity 0.2s, transform 0.1s;
       white-space: nowrap;
     }
-    .btn:hover { opacity: 0.85; }
-    .btn:active { transform: scale(0.97); }
+    .btn:hover   { opacity: 0.85; }
+    .btn:active  { transform: scale(0.97); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
     .btn-outline:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+    .btn-sm { padding: 7px 14px; font-size: 0.82rem; }
+    .btn-success { background: var(--accent2); }
 
-    .btn-danger { background: var(--danger); }
-
-    /* Bulk import */
+    /* ── Bulk ── */
     .bulk-toggle {
-      font-size: 0.8rem;
-      color: var(--muted);
-      cursor: pointer;
-      text-decoration: underline;
-      margin-bottom: 12px;
-      display: inline-block;
+      font-size: 0.8rem; color: var(--muted); cursor: pointer;
+      text-decoration: underline; margin-bottom: 12px; display: inline-block;
     }
     .bulk-area { display: none; margin-bottom: 12px; }
     .bulk-area.open { display: block; }
     .bulk-area textarea {
-      width: 100%;
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-size: 0.85rem;
-      resize: vertical;
-      min-height: 90px;
-      outline: none;
+      width: 100%; background: var(--card2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; color: var(--text);
+      font-size: 0.85rem; resize: vertical; min-height: 90px; outline: none;
     }
     .bulk-area textarea:focus { border-color: var(--accent); }
 
-    /* URL List */
+    /* ── URL List ── */
     #url-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 380px;
-      overflow-y: auto;
-      padding-right: 4px;
+      list-style: none; display: flex; flex-direction: column;
+      gap: 8px; max-height: 380px; overflow-y: auto; padding-right: 4px;
     }
-
     #url-list::-webkit-scrollbar { width: 5px; }
-    #url-list::-webkit-scrollbar-track { background: transparent; }
     #url-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
     .url-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      transition: border-color 0.2s;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px;
+      cursor: pointer; transition: border-color 0.2s;
     }
-
-    .url-item.indexed { border-left: 3px solid var(--accent2); }
+    .url-item:hover { border-color: var(--accent); }
+    .url-item.indexed     { border-left: 3px solid var(--accent2); }
     .url-item.not-indexed { border-left: 3px solid var(--danger); }
-    .url-item.checking { border-left: 3px solid var(--accent); }
-    .url-item.error { border-left: 3px solid #f59e0b; }
+    .url-item.checking    { border-left: 3px solid var(--accent); }
+    .url-item.error       { border-left: 3px solid var(--warn); }
 
-    .url-item .status-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      background: var(--border);
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--border); flex-shrink: 0;
     }
-    .url-item.indexed .status-dot { background: var(--accent2); }
-    .url-item.not-indexed .status-dot { background: var(--danger); }
-    .url-item.error .status-dot { background: #f59e0b; }
-    .url-item.checking .status-dot {
-      background: var(--accent);
-      animation: pulse 1s infinite;
-    }
+    .indexed     .status-dot { background: var(--accent2); }
+    .not-indexed .status-dot { background: var(--danger); }
+    .error       .status-dot { background: var(--warn); }
+    .checking    .status-dot { background: var(--accent); animation: pulse 1s infinite; }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    .url-item .url-text {
-      flex: 1;
-      font-size: 0.82rem;
-      color: var(--text);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .url-text {
+      flex: 1; font-size: 0.82rem; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
     }
-
-    .url-item .url-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 20px;
-      white-space: nowrap;
+    .url-label {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px; white-space: nowrap;
     }
-    .indexed .url-label { background: rgba(0,212,170,0.15); color: var(--accent2); }
+    .indexed     .url-label { background: rgba(0,212,170,0.15);  color: var(--accent2); }
     .not-indexed .url-label { background: rgba(255,92,114,0.15); color: var(--danger); }
-    .checking .url-label { background: rgba(108,99,255,0.15); color: var(--accent); }
-    .error .url-label { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .checking    .url-label { background: rgba(108,99,255,0.15); color: var(--accent); }
+    .error       .url-label { background: rgba(245,158,11,0.15); color: var(--warn); }
 
-    .url-item .btn-remove {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 1rem;
-      padding: 0 2px;
-      line-height: 1;
-      transition: color 0.2s;
+    .btn-remove {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 1rem; padding: 0 2px; line-height: 1;
+      transition: color 0.2s; flex-shrink: 0;
     }
-    .url-item .btn-remove:hover { color: var(--danger); }
+    .btn-remove:hover { color: var(--danger); }
 
     .empty-state {
-      text-align: center;
-      color: var(--muted);
-      padding: 40px 0;
-      font-size: 0.9rem;
+      text-align: center; color: var(--muted); padding: 40px 0; font-size: 0.9rem;
     }
 
-    /* Right column */
+    /* ── Right col ── */
     .right-col { display: flex; flex-direction: column; gap: 20px; }
 
-    /* Stats */
+    /* ── Stats ── */
     .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 4px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px;
     }
-
     .stat-box {
-      background: var(--card2);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
+      background: var(--card2); border-radius: 10px; padding: 16px; text-align: center;
     }
-
-    .stat-box .stat-val {
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .stat-box .stat-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .stat-val.green { color: var(--accent2); }
-    .stat-val.red { color: var(--danger); }
+    .stat-val { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+    .stat-val.green  { color: var(--accent2); }
+    .stat-val.red    { color: var(--danger); }
     .stat-val.purple { color: var(--accent); }
 
-    /* Donut chart */
-    .chart-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 8px 0;
+    /* ── Progress ── */
+    #progress-wrap { margin-top: 16px; }
+    .progress-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
     }
-
-    .donut-container {
-      position: relative;
-      width: 180px; height: 180px;
-    }
-
-    .donut-container svg { transform: rotate(-90deg); }
-
-    .donut-text {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-    .donut-pct {
-      font-size: 2.2rem;
-      font-weight: 800;
-      line-height: 1;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .donut-sub { font-size: 0.72rem; color: var(--muted); }
-
-    .legend {
-      display: flex;
-      gap: 16px;
-      margin-top: 12px;
-    }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-    /* Action buttons */
-    .action-row {
-      display: flex;
-      gap: 8px;
-    }
-    .action-row .btn { flex: 1; }
-
-    /* Progress bar */
+    .progress-label { font-size: 0.82rem; font-weight: 600; }
+    .progress-pct   { font-size: 0.82rem; font-weight: 700; color: var(--accent); }
     .progress-bar-wrap {
-      margin-top: 12px;
-      background: var(--card2);
-      border-radius: 20px;
-      height: 8px;
-      overflow: hidden;
+      background: var(--card2); border-radius: 20px; height: 8px; overflow: hidden;
     }
     .progress-bar {
       height: 100%;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 20px;
-      transition: width 0.4s ease;
-      width: 0%;
+      border-radius: 20px; transition: width 0.4s ease; width: 0%;
     }
+    .progress-eta { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 4px; }
 
-    .progress-label {
-      font-size: 0.82rem;
-      color: var(--text);
-      margin-top: 8px;
-      text-align: center;
-      font-weight: 600;
+    /* ── Donut ── */
+    .chart-wrap { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
+    .donut-container { position: relative; width: 180px; height: 180px; }
+    .donut-container svg { transform: rotate(-90deg); }
+    .donut-text {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%); text-align: center;
     }
-    .progress-eta {
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 2px;
+    .donut-pct {
+      font-size: 2.2rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
+    .donut-sub { font-size: 0.72rem; color: var(--muted); }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px; justify-content: center; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-    /* Notice */
+    /* ── Action row ── */
+    .action-row { display: flex; gap: 8px; }
+    .action-row .btn { flex: 1; }
+
+    /* ── Notice ── */
     .notice {
-      background: rgba(108,99,255,0.1);
-      border: 1px solid rgba(108,99,255,0.3);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.5;
+      background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 8px; padding: 10px 14px; font-size: 0.78rem;
+      color: var(--muted); line-height: 1.6; margin-top: 14px;
     }
     .notice strong { color: var(--text); }
-
-    /* Spinner */
-    .spinner {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
+    .notice code {
+      background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; width: 100%; max-width: 480px;
+      margin: 16px;
+    }
+    .modal h3 { font-size: 1.1rem; margin-bottom: 6px; }
+    .modal .sub { color: var(--muted); font-size: 0.83rem; margin-bottom: 20px; line-height: 1.5; }
+    .field-label {
+      font-size: 0.8rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;
+    }
+    .field-group { margin-bottom: 14px; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+    .modal-actions .btn { flex: 1; }
+
+    .steps {
+      background: var(--card2); border-radius: 8px; padding: 12px 14px;
+      font-size: 0.78rem; line-height: 1.8; color: var(--muted); margin-bottom: 16px;
+    }
+    .steps strong { color: var(--text); }
+    .steps a { color: var(--accent); text-decoration: none; }
+    .steps a:hover { text-decoration: underline; }
+
+    .quota-info {
+      font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 8px;
+    }
+    .quota-info span { color: var(--accent2); font-weight: 600; }
   </style>
 </head>
 <body>
 
+<!-- ── Settings Modal ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>⚙ Configuration API Google</h3>
+    <p class="sub">
+      L'API Google Custom Search est <strong>gratuite (100 requêtes/jour)</strong> et fonctionne directement dans le navigateur — aucun proxy, résultats fiables et précis.
+    </p>
+
+    <div class="steps">
+      <strong>1.</strong> Créez une clé API sur
+      <a href="https://console.cloud.google.com/apis/credentials" target="_blank">console.cloud.google.com</a>
+      → activer <em>Custom Search API</em><br>
+      <strong>2.</strong> Créez un moteur de recherche sur
+      <a href="https://programmablesearchengine.google.com/" target="_blank">programmablesearchengine.google.com</a><br>
+      <strong>3.</strong> Dans les paramètres du moteur, activez <em>"Rechercher sur tout le web"</em><br>
+      <strong>4.</strong> Copiez l'<em>ID du moteur (cx)</em> et collez-le ci-dessous
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Clé API</label>
+      <input class="field-input" id="cfg-key" type="password" placeholder="AIzaSy…" />
+    </div>
+    <div class="field-group">
+      <label class="field-label">ID du moteur de recherche (cx)</label>
+      <input class="field-input" id="cfg-cx" placeholder="a1b2c3d4e5f6…" />
+    </div>
+
+    <div class="quota-info">Quota gratuit : <span>100 vérifications/jour</span> par projet</div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="btn-modal-cancel">Annuler</button>
+      <button class="btn btn-success" id="btn-modal-save">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Header ── -->
 <header>
   <div class="logo">&#128269;</div>
   <div>
     <h1>SEO Index Dashboard</h1>
     <p>Vérifiez l'indexation Google de vos pages</p>
   </div>
+  <div class="api-badge" id="api-badge" title="Configurer l'API Google">
+    <div class="dot"></div>
+    <span class="api-label" id="api-label">API non configurée</span>
+    <span style="color:var(--muted);margin-left:2px">⚙</span>
+  </div>
 </header>
 
 <div class="grid">
 
-  <!-- LEFT: URL manager -->
+  <!-- LEFT -->
   <div class="card">
     <h2>Mes pages</h2>
 
@@ -394,19 +380,19 @@
 
     <span class="bulk-toggle" id="bulk-toggle">+ Import en masse (une URL par ligne)</span>
     <div class="bulk-area" id="bulk-area">
-      <textarea id="bulk-input" placeholder="https://monsite.com/page-1&#10;https://monsite.com/page-2&#10;https://monsite.com/page-3"></textarea>
+      <textarea id="bulk-input" placeholder="https://monsite.com/page-1&#10;https://monsite.com/page-2"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="btn btn-outline" id="btn-bulk-add">Importer</button>
-        <button class="btn btn-outline btn-danger" id="btn-clear-all">Tout supprimer</button>
+        <button class="btn btn-outline btn-sm" id="btn-bulk-add">Importer</button>
+        <button class="btn btn-outline btn-sm" style="border-color:var(--danger);color:var(--danger)" id="btn-clear-all">Tout supprimer</button>
       </div>
     </div>
 
     <ul id="url-list">
-      <li class="empty-state" id="empty-msg">Aucune URL ajoutée. Commencez par ajouter vos pages.</li>
+      <li class="empty-state" id="empty-msg">Aucune URL ajoutée. Commencez par ajouter vos pages ci-dessus.</li>
     </ul>
   </div>
 
-  <!-- RIGHT: Stats + Chart -->
+  <!-- RIGHT -->
   <div class="right-col">
 
     <div class="card">
@@ -431,9 +417,9 @@
       </div>
 
       <div id="progress-wrap" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <span class="progress-label" id="progress-label" style="margin:0">0 / 0 vérifiées</span>
-          <span id="progress-pct" style="font-size:0.82rem;font-weight:700;color:var(--accent)">0%</span>
+        <div class="progress-header">
+          <span class="progress-label" id="progress-label">0 / 0 vérifiées</span>
+          <span class="progress-pct"   id="progress-pct">0%</span>
         </div>
         <div class="progress-bar-wrap">
           <div class="progress-bar" id="progress-bar"></div>
@@ -447,16 +433,13 @@
       <div class="chart-wrap">
         <div class="donut-container">
           <svg width="180" height="180" viewBox="0 0 180 180">
-            <circle id="donut-bg" cx="90" cy="90" r="70"
-              fill="none" stroke="#2e3350" stroke-width="22"/>
-            <circle id="donut-indexed" cx="90" cy="90" r="70"
-              fill="none" stroke="#00d4aa" stroke-width="22"
-              stroke-dasharray="0 440" stroke-linecap="round"
-              style="transition: stroke-dasharray 0.6s ease"/>
-            <circle id="donut-not" cx="90" cy="90" r="70"
-              fill="none" stroke="#ff5c72" stroke-width="22"
-              stroke-dasharray="0 440" stroke-linecap="round"
-              style="transition: stroke-dasharray 0.6s ease"/>
+            <circle cx="90" cy="90" r="70" fill="none" stroke="#2e3350" stroke-width="22"/>
+            <circle id="donut-indexed" cx="90" cy="90" r="70" fill="none"
+              stroke="#00d4aa" stroke-width="22" stroke-dasharray="0 440"
+              stroke-linecap="round" style="transition:stroke-dasharray 0.6s ease"/>
+            <circle id="donut-not" cx="90" cy="90" r="70" fill="none"
+              stroke="#ff5c72" stroke-width="22" stroke-dasharray="0 440"
+              stroke-linecap="round" style="transition:stroke-dasharray 0.6s ease"/>
           </svg>
           <div class="donut-text">
             <div class="donut-pct" id="donut-pct">—</div>
@@ -464,39 +447,21 @@
           </div>
         </div>
         <div class="legend">
-          <div class="legend-item">
-            <div class="legend-dot" style="background:var(--accent2)"></div>
-            <span>Indexée</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-dot" style="background:var(--danger)"></div>
-            <span>Non indexée</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-dot" style="background:var(--border)"></div>
-            <span>En attente</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-dot" style="background:#f59e0b"></div>
-            <span>Erreur</span>
-          </div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div><span>Indexée</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div><span>Non indexée</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div><span>En attente</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div><span>Erreur</span></div>
         </div>
       </div>
     </div>
 
     <div class="card">
       <div class="action-row">
-        <button class="btn" id="btn-check">
-          &#128269; Vérifier tout
-        </button>
-        <button class="btn btn-outline" id="btn-refresh">
-          &#8635; Relancer
-        </button>
+        <button class="btn" id="btn-check">&#128269; Vérifier tout</button>
+        <button class="btn btn-outline" id="btn-refresh">&#8635; Relancer</button>
       </div>
-
-      <div class="notice" style="margin-top:14px">
-        <strong>Comment ça fonctionne ?</strong><br>
-        Vérification via <strong>Bing</strong> (moins de CAPTCHA) puis Google en fallback, à travers 5 proxys CORS en cascade. <span style="color:#f59e0b">⚠ Erreur</span> = tous les proxys bloqués → cliquez la ligne pour vérifier manuellement.
+      <div class="notice" id="notice-text">
+        Configurez d'abord l'API Google en cliquant sur le badge en haut à droite. Gratuit, 100 vérifications/jour.
       </div>
     </div>
 
@@ -504,14 +469,57 @@
 </div>
 
 <script>
-  // ── State ──────────────────────────────────────────────────────────────────
+  // ── Config ────────────────────────────────────────────────────────────────
+  let cfg = JSON.parse(localStorage.getItem('seo_cfg') || '{}');
+  // cfg: { key, cx }
+
+  function hasApi() { return !!(cfg.key && cfg.cx); }
+
+  function saveCfg() { localStorage.setItem('seo_cfg', JSON.stringify(cfg)); }
+
+  function updateApiBadge() {
+    const badge = document.getElementById('api-badge');
+    const label = document.getElementById('api-label');
+    const notice = document.getElementById('notice-text');
+    if (hasApi()) {
+      badge.className = 'api-badge ok';
+      label.textContent = 'API Google active';
+      notice.innerHTML = '<strong>API Google Custom Search active.</strong> 100 requêtes gratuites/jour. Cliquez sur une ligne pour voir la page sur Google.';
+    } else {
+      badge.className = 'api-badge warn';
+      label.textContent = 'API non configurée';
+      notice.innerHTML = 'Configurez l\'API Google en cliquant sur le badge ⚙ en haut. <strong>Gratuit, 100 vérifications/jour</strong> — sans proxy, résultats fiables.';
+    }
+  }
+
+  // ── Modal ─────────────────────────────────────────────────────────────────
+  function openModal() {
+    document.getElementById('cfg-key').value = cfg.key || '';
+    document.getElementById('cfg-cx').value  = cfg.cx  || '';
+    document.getElementById('modal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+  document.getElementById('api-badge').addEventListener('click', openModal);
+  document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal')) closeModal();
+  });
+  document.getElementById('btn-modal-save').addEventListener('click', () => {
+    const key = document.getElementById('cfg-key').value.trim();
+    const cx  = document.getElementById('cfg-cx').value.trim();
+    if (!key || !cx) { alert('Veuillez remplir les deux champs.'); return; }
+    cfg = { key, cx };
+    saveCfg();
+    updateApiBadge();
+    closeModal();
+  });
+
+  // ── State ─────────────────────────────────────────────────────────────────
   let urls = JSON.parse(localStorage.getItem('seo_urls') || '[]');
   let checking = false;
 
-  // ── Persist ────────────────────────────────────────────────────────────────
   function save() { localStorage.setItem('seo_urls', JSON.stringify(urls)); }
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
   function genId() { return Math.random().toString(36).slice(2); }
 
   function addUrl(raw) {
@@ -521,41 +529,38 @@
     try { new URL(raw); } catch { alert('URL invalide : ' + raw); return; }
     if (urls.find(u => u.url === raw)) return;
     urls.push({ id: genId(), url: raw, status: 'pending' });
-    save();
-    render();
+    save(); render();
   }
 
   function removeUrl(id) {
     urls = urls.filter(u => u.id !== id);
-    save();
-    render();
+    save(); render();
   }
 
-  // ── Labels & classes ───────────────────────────────────────────────────────
+  // ── Labels ────────────────────────────────────────────────────────────────
   const STATUS_LABEL = {
-    pending:     '— En attente',
-    checking:    'Vérification…',
-    indexed:     '✓ Indexée',
+    pending:       '— En attente',
+    checking:      'Vérification…',
+    indexed:       '✓ Indexée',
     'not-indexed': '✗ Non indexée',
-    error:       '⚠ Erreur proxy'
+    error:         '⚠ Erreur API',
   };
 
-  // ── Render list ────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   function render() {
     const list  = document.getElementById('url-list');
     const empty = document.getElementById('empty-msg');
     if (urls.length === 0) {
       list.innerHTML = '';
       list.appendChild(empty);
-      updateStats(); updateChart();
-      return;
+      updateStats(); updateChart(); return;
     }
     list.innerHTML = '';
     urls.forEach(item => {
       const li = document.createElement('li');
-      li.className = 'url-item ' + item.status;
+      li.className  = 'url-item ' + item.status;
       li.dataset.id = item.id;
-      li.innerHTML = `
+      li.innerHTML  = `
         <div class="status-dot"></div>
         <span class="url-text" title="${item.url}">${item.url}</span>
         <span class="url-label">${STATUS_LABEL[item.status] || '—'}</span>
@@ -577,7 +582,7 @@
     updateStats(); updateChart();
   }
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
+  // ── Stats ─────────────────────────────────────────────────────────────────
   function updateStats() {
     const total   = urls.length;
     const indexed = urls.filter(u => u.status === 'indexed').length;
@@ -589,7 +594,7 @@
     document.getElementById('stat-pending').textContent = pending;
   }
 
-  // ── Donut chart ────────────────────────────────────────────────────────────
+  // ── Donut chart ───────────────────────────────────────────────────────────
   function updateChart() {
     const C = 2 * Math.PI * 70;
     const total   = urls.length;
@@ -602,13 +607,10 @@
     if (total === 0 || indexed + notIdx === 0) {
       dIdx.setAttribute('stroke-dasharray', `0 ${C}`);
       dNot.setAttribute('stroke-dasharray', `0 ${C}`);
-      pctEl.textContent = '—';
-      return;
+      pctEl.textContent = '—'; return;
     }
-    const checked = indexed + notIdx;
-    const pct = Math.round((indexed / checked) * 100);
+    const pct = Math.round((indexed / (indexed + notIdx)) * 100);
     pctEl.textContent = pct + '%';
-
     const idxArc = (indexed / total) * C;
     const notArc = (notIdx  / total) * C;
     dIdx.setAttribute('stroke-dasharray', `${idxArc} ${C - idxArc}`);
@@ -617,174 +619,104 @@
     dNot.setAttribute('stroke-dashoffset', `-${idxArc}`);
   }
 
-  // ── Proxy fetch helper ────────────────────────────────────────────────────
-  async function tryFetch(url, isJson) {
+  // ── Google Custom Search API check ────────────────────────────────────────
+  async function checkViaGoogleApi(pageUrl) {
+    if (!hasApi()) return { status: 'error' };
+    const q   = encodeURIComponent('site:' + pageUrl);
+    const url = `https://www.googleapis.com/customsearch/v1?key=${cfg.key}&cx=${cfg.cx}&q=${q}&num=1`;
     try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      if (!r.ok) return null;
-      if (isJson) {
-        const d = await r.json();
-        const c = d.contents || d.body || '';
-        return c.length > 800 ? c : null;
+      const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
+      const d = await r.json();
+      if (!r.ok) {
+        // API error (wrong key, quota exceeded, etc.)
+        const msg = d?.error?.message || 'API error';
+        console.warn('Google API error:', msg);
+        // Quota exceeded → status 429
+        if (r.status === 429 || msg.includes('quota')) return { status: 'quota' };
+        return { status: 'error' };
       }
-      const t = await r.text();
-      return t.length > 800 ? t : null;
-    } catch { return null; }
-  }
-
-  // ── Fetch search results via multiple proxies (Bing first, then Google) ───
-  async function fetchSearchHtml(pageUrl) {
-    const enc = encodeURIComponent;
-    const bingUrl   = 'https://www.bing.com/search?q=' + enc('site:' + pageUrl) + '&count=1&setlang=fr';
-    const googleUrl = 'https://www.google.com/search?q=' + enc('site:' + pageUrl) + '&num=1&hl=fr';
-
-    const attempts = [
-      // Bing is far less aggressive with CAPTCHAs — try it first with 3 proxies
-      { url: 'https://api.allorigins.win/get?url=' + enc(bingUrl),                isJson: true,  engine: 'bing' },
-      { url: 'https://api.codetabs.com/v1/proxy?quest=' + enc(bingUrl),           isJson: false, engine: 'bing' },
-      { url: 'https://thingproxy.freeboard.io/fetch/' + bingUrl,                  isJson: false, engine: 'bing' },
-      // Google fallback
-      { url: 'https://api.allorigins.win/get?url=' + enc(googleUrl),              isJson: true,  engine: 'google' },
-      { url: 'https://api.codetabs.com/v1/proxy?quest=' + enc(googleUrl),         isJson: false, engine: 'google' },
-    ];
-
-    for (const a of attempts) {
-      const html = await tryFetch(a.url, a.isJson);
-      if (html) return { html, engine: a.engine };
+      const total = parseInt(d?.searchInformation?.totalResults || '0', 10);
+      return { status: total > 0 ? 'indexed' : 'not-indexed' };
+    } catch (e) {
+      return { status: 'error' };
     }
-    return null;
-  }
-
-  // ── Detect indexation ─────────────────────────────────────────────────────
-  // Strict: only return 'indexed' on a strong unambiguous signal.
-  // Prefer 'error' over a false positive.
-  function detectStatus({ html, engine }) {
-    if (engine === 'bing') {
-      // Strong "no results" signals from Bing
-      const NO = [
-        /no results found/i,
-        /there are no results for/i,
-        /didn.t match any results/i,
-        /aucun r[eé]sultat/i,
-        /keine Ergebnisse/i,
-        /class="b_no"/,
-        /id="b_results"[^>]*>[\s\S]{0,200}class="b_no"/,
-      ];
-      // Strong "has results" signal: Bing wraps each result in class="b_algo"
-      // This is specific enough — navigation/footer never use this class
-      const YES = [/class="b_algo"/, /b_attribution/];
-
-      for (const p of NO)  if (p.test(html)) return 'not-indexed';
-      for (const p of YES) if (p.test(html)) return 'indexed';
-    } else {
-      // Google
-      const NO = [
-        /did not match any documents/i,
-        /n['']a pas renvoy[eé]/i,
-        /aucun r[eé]sultat/i,
-        /aucun document/i,
-        /no results found/i,
-        /did not match/i,
-        /keine.*ergebnisse/i,
-      ];
-      // Strong Google signals: result-stats div or specific result class
-      const YES = [
-        /id="result-stats"/,
-        /class="[^"]*LC20lb[^"]*"/,
-        /Environ <b>[\d\s]+<\/b> r[eé]sultat/i,
-        /About <b>[\d,]+<\/b> result/i,
-      ];
-
-      for (const p of NO)  if (p.test(html)) return 'not-indexed';
-      for (const p of YES) if (p.test(html)) return 'indexed';
-    }
-
-    // Ambiguous response (CAPTCHA, redirect, incomplete) → don't guess
-    return 'error';
   }
 
   // ── Check one URL ─────────────────────────────────────────────────────────
   async function checkUrl(item) {
     item.status = 'checking';
     renderItem(item);
-
-    const result = await fetchSearchHtml(item.url);
-    item.status = result ? detectStatus(result) : 'error';
-
+    const result = await checkViaGoogleApi(item.url);
+    item.status = result.status === 'quota' ? 'error' : result.status;
+    if (result.status === 'quota') {
+      // Stop everything — quota exceeded
+      return 'quota';
+    }
     renderItem(item);
     save();
+    return 'ok';
   }
 
-  // ── Format seconds as mm:ss ────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
   function fmtTime(s) {
     if (s < 60) return s + 's';
     return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
   }
 
-  // ── Check all (parallel batches) ───────────────────────────────────────────
-  const BATCH_SIZE  = 3;   // parallel requests
-  const BATCH_DELAY = 700; // ms between batches (avoid rate-limit)
+  // ── Check all ─────────────────────────────────────────────────────────────
+  const BATCH_SIZE  = 2;    // Google API is sensitive to bursts
+  const BATCH_DELAY = 600;  // ms between batches
 
   async function checkAll(resetFirst = false) {
     if (checking) return;
     if (urls.length === 0) return;
+    if (!hasApi()) { openModal(); return; }
 
-    if (resetFirst) {
-      urls.forEach(u => u.status = 'pending');
-      render();
-    }
+    if (resetFirst) { urls.forEach(u => u.status = 'pending'); render(); }
 
     checking = true;
-    document.getElementById('btn-check').disabled = true;
+    document.getElementById('btn-check').disabled   = true;
     document.getElementById('btn-refresh').disabled = true;
 
     const toCheck = urls.filter(u => u.status === 'pending' || u.status === 'error');
-    const total = toCheck.length;
-    if (total === 0) {
-      checking = false;
-      document.getElementById('btn-check').disabled = false;
-      document.getElementById('btn-refresh').disabled = false;
-      return;
-    }
+    const total   = toCheck.length;
+    if (total === 0) { finish(); return; }
 
     const progressWrap  = document.getElementById('progress-wrap');
     const progressBar   = document.getElementById('progress-bar');
     const progressLabel = document.getElementById('progress-label');
+    const progressPct   = document.getElementById('progress-pct');
     const progressEta   = document.getElementById('progress-eta');
     progressWrap.style.display = 'block';
     progressBar.style.width = '0%';
 
     const startTime = Date.now();
     let done = 0;
-
-    // Estimate: batch of 3 takes ~(9s timeout + 0.7s delay) worst case, but typically ~2–4s
-    const EST_PER_BATCH_MS = 3500; // optimistic
-    const totalBatches = Math.ceil(total / BATCH_SIZE);
-
-    const progressPct = document.getElementById('progress-pct');
+    let quotaHit = false;
 
     function updateProgress() {
       const pct = Math.round((done / total) * 100);
       progressBar.style.width = pct + '%';
       progressPct.textContent = pct + '%';
       progressLabel.textContent = `${done} / ${total} vérifiées`;
-
       if (done > 0) {
-        const elapsed = Date.now() - startTime;
-        const msPerItem = elapsed / done;
-        const remaining = Math.ceil((total - done) * msPerItem / 1000);
-        progressEta.textContent = remaining > 0 ? `Temps restant estimé : ~${fmtTime(remaining)}` : '';
+        const elapsed   = Date.now() - startTime;
+        const remaining = Math.ceil(((total - done) * elapsed / done) / 1000);
+        progressEta.textContent = remaining > 0 ? `Temps restant : ~${fmtTime(remaining)}` : '';
       } else {
-        const estimate = Math.ceil(totalBatches * EST_PER_BATCH_MS / 1000);
-        progressEta.textContent = `Durée estimée : ~${fmtTime(estimate)}`;
+        const est = Math.ceil((Math.ceil(total / BATCH_SIZE) * (BATCH_DELAY + 1200)) / 1000);
+        progressEta.textContent = `Durée estimée : ~${fmtTime(est)}`;
       }
     }
-
     updateProgress();
 
+    outer:
     for (let i = 0; i < toCheck.length; i += BATCH_SIZE) {
       const batch = toCheck.slice(i, i + BATCH_SIZE);
-      await Promise.all(batch.map(item => checkUrl(item)));
+      const results = await Promise.all(batch.map(item => checkUrl(item)));
+      for (const r of results) {
+        if (r === 'quota') { quotaHit = true; break outer; }
+      }
       done += batch.length;
       updateProgress();
       if (i + BATCH_SIZE < toCheck.length) {
@@ -794,21 +726,28 @@
 
     progressBar.style.width = '100%';
     progressPct.textContent = '100%';
-    progressLabel.textContent = 'Vérification terminée ✓';
-    progressEta.textContent = `Durée totale : ${fmtTime(Math.round((Date.now() - startTime) / 1000))}`;
+    if (quotaHit) {
+      progressLabel.textContent = '⚠ Quota journalier atteint';
+      progressEta.textContent = 'Réessayez demain ou augmentez votre quota Google Cloud.';
+    } else {
+      progressLabel.textContent = 'Vérification terminée ✓';
+      progressEta.textContent = `Durée : ${fmtTime(Math.round((Date.now() - startTime) / 1000))}`;
+    }
     setTimeout(() => {
       progressWrap.style.display = 'none';
       progressBar.style.width = '0%';
-      progressPct.textContent = '0%';
-      progressEta.textContent = '';
-    }, 3500);
+    }, 4000);
 
+    finish();
+  }
+
+  function finish() {
     checking = false;
-    document.getElementById('btn-check').disabled = false;
+    document.getElementById('btn-check').disabled   = false;
     document.getElementById('btn-refresh').disabled = false;
   }
 
-  // ── Click URL → open Google manually ──────────────────────────────────────
+  // ── Click URL → open Google ───────────────────────────────────────────────
   document.getElementById('url-list').addEventListener('click', e => {
     const li = e.target.closest('.url-item');
     if (!li || e.target.classList.contains('btn-remove')) return;
@@ -816,36 +755,31 @@
     if (item) window.open('https://www.google.com/search?q=site:' + encodeURIComponent(item.url), '_blank');
   });
 
-  // ── Event listeners ────────────────────────────────────────────────────────
+  // ── Event listeners ───────────────────────────────────────────────────────
   document.getElementById('btn-add').addEventListener('click', () => {
     const input = document.getElementById('url-input');
-    addUrl(input.value);
-    input.value = '';
-    input.focus();
+    addUrl(input.value); input.value = ''; input.focus();
   });
-
   document.getElementById('url-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('btn-add').click();
   });
-
   document.getElementById('bulk-toggle').addEventListener('click', () => {
     document.getElementById('bulk-area').classList.toggle('open');
   });
-
   document.getElementById('btn-bulk-add').addEventListener('click', () => {
     document.getElementById('bulk-input').value.split('\n').forEach(l => addUrl(l));
     document.getElementById('bulk-input').value = '';
     document.getElementById('bulk-area').classList.remove('open');
   });
-
   document.getElementById('btn-clear-all').addEventListener('click', () => {
     if (!confirm('Supprimer toutes les URLs ?')) return;
     urls = []; save(); render();
   });
-
   document.getElementById('btn-check').addEventListener('click',   () => checkAll(false));
   document.getElementById('btn-refresh').addEventListener('click', () => checkAll(true));
 
+  // ── Init ──────────────────────────────────────────────────────────────────
+  updateApiBadge();
   render();
 </script>
 </body>
