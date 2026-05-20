@@ -677,25 +677,38 @@
 
   // ── Google Custom Search API check ────────────────────────────────────────
   async function checkViaGoogleApi(pageUrl) {
-    if (!hasApi()) return { status: 'error' };
+    if (!hasApi()) return { status: 'error', msg: 'API non configurée' };
     const q   = encodeURIComponent('site:' + pageUrl);
     const url = `https://www.googleapis.com/customsearch/v1?key=${cfg.key}&cx=${cfg.cx}&q=${q}&num=1`;
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
       const d = await r.json();
       if (!r.ok) {
-        // API error (wrong key, quota exceeded, etc.)
-        const msg = d?.error?.message || 'API error';
-        console.warn('Google API error:', msg);
-        // Quota exceeded → status 429
-        if (r.status === 429 || msg.includes('quota')) return { status: 'quota' };
+        const msg = d?.error?.message || 'Erreur inconnue';
+        const code = d?.error?.code || r.status;
+        console.error('Google API error:', code, msg);
+        showApiError(`Erreur ${code} : ${msg}`);
+        if (r.status === 429 || msg.toLowerCase().includes('quota')) return { status: 'quota' };
         return { status: 'error' };
       }
+      hideApiError();
       const total = parseInt(d?.searchInformation?.totalResults || '0', 10);
       return { status: total > 0 ? 'indexed' : 'not-indexed' };
     } catch (e) {
+      showApiError('Impossible de joindre l\'API Google : ' + e.message);
       return { status: 'error' };
     }
+  }
+
+  function showApiError(msg) {
+    const notice = document.getElementById('notice-text');
+    notice.style.background = 'rgba(255,92,114,0.1)';
+    notice.style.borderColor = 'rgba(255,92,114,0.3)';
+    notice.innerHTML = '⚠ <strong>Erreur API :</strong> ' + msg + '<br><small style="color:var(--muted)">Vérifiez votre clé API et votre cx dans les paramètres ⚙</small>';
+  }
+
+  function hideApiError() {
+    updateApiBadge(); // resets notice to normal
   }
 
   // ── Check one URL ─────────────────────────────────────────────────────────
