@@ -175,6 +175,7 @@
     .url-item.indexed { border-left: 3px solid var(--accent2); }
     .url-item.not-indexed { border-left: 3px solid var(--danger); }
     .url-item.checking { border-left: 3px solid var(--accent); }
+    .url-item.error { border-left: 3px solid #f59e0b; }
 
     .url-item .status-dot {
       width: 10px; height: 10px;
@@ -184,6 +185,7 @@
     }
     .url-item.indexed .status-dot { background: var(--accent2); }
     .url-item.not-indexed .status-dot { background: var(--danger); }
+    .url-item.error .status-dot { background: #f59e0b; }
     .url-item.checking .status-dot {
       background: var(--accent);
       animation: pulse 1s infinite;
@@ -213,6 +215,7 @@
     .indexed .url-label { background: rgba(0,212,170,0.15); color: var(--accent2); }
     .not-indexed .url-label { background: rgba(255,92,114,0.15); color: var(--danger); }
     .checking .url-label { background: rgba(108,99,255,0.15); color: var(--accent); }
+    .error .url-label { background: rgba(245,158,11,0.15); color: #f59e0b; }
 
     .url-item .btn-remove {
       background: none;
@@ -329,10 +332,17 @@
     }
 
     .progress-label {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--text);
+      margin-top: 8px;
       text-align: center;
+      font-weight: 600;
+    }
+    .progress-eta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 2px;
     }
 
     /* Notice */
@@ -421,10 +431,14 @@
       </div>
 
       <div id="progress-wrap" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span class="progress-label" id="progress-label" style="margin:0">0 / 0 vérifiées</span>
+          <span id="progress-pct" style="font-size:0.82rem;font-weight:700;color:var(--accent)">0%</span>
+        </div>
         <div class="progress-bar-wrap">
           <div class="progress-bar" id="progress-bar"></div>
         </div>
-        <div class="progress-label" id="progress-label">Vérification en cours…</div>
+        <div class="progress-eta" id="progress-eta"></div>
       </div>
     </div>
 
@@ -462,6 +476,10 @@
             <div class="legend-dot" style="background:var(--border)"></div>
             <span>En attente</span>
           </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#f59e0b"></div>
+            <span>Erreur</span>
+          </div>
         </div>
       </div>
     </div>
@@ -478,7 +496,7 @@
 
       <div class="notice" style="margin-top:14px">
         <strong>Comment ça fonctionne ?</strong><br>
-        La vérification ouvre un onglet Google avec la requête <code>site:votre-url</code>. En raison des restrictions CORS, le résultat visuel s'ouvre dans un nouvel onglet Google — vous voyez directement si la page est indexée.
+        Interrogation automatique via 2 proxys CORS (allorigins + corsproxy.io) avec la requête <code>site:url</code>. Les vérifications tournent <strong>3 en parallèle</strong>. <span style="color:#f59e0b">⚠ Erreur</span> = proxy bloqué, cliquez sur la ligne pour vérifier manuellement sur Google.
       </div>
     </div>
 
@@ -488,25 +506,20 @@
 <script>
   // ── State ──────────────────────────────────────────────────────────────────
   let urls = JSON.parse(localStorage.getItem('seo_urls') || '[]');
-  // Each: { id, url, status: 'pending'|'indexed'|'not-indexed'|'checking' }
-
   let checking = false;
 
   // ── Persist ────────────────────────────────────────────────────────────────
-  function save() {
-    localStorage.setItem('seo_urls', JSON.stringify(urls));
-  }
+  function save() { localStorage.setItem('seo_urls', JSON.stringify(urls)); }
 
-  // ── DOM helpers ────────────────────────────────────────────────────────────
+  // ── Helpers ────────────────────────────────────────────────────────────────
   function genId() { return Math.random().toString(36).slice(2); }
 
   function addUrl(raw) {
     raw = raw.trim();
     if (!raw) return;
-    // Auto-prefix
     if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
     try { new URL(raw); } catch { alert('URL invalide : ' + raw); return; }
-    if (urls.find(u => u.url === raw)) return; // deduplicate
+    if (urls.find(u => u.url === raw)) return;
     urls.push({ id: genId(), url: raw, status: 'pending' });
     save();
     render();
@@ -518,177 +531,178 @@
     render();
   }
 
+  // ── Labels & classes ───────────────────────────────────────────────────────
+  const STATUS_LABEL = {
+    pending:     '— En attente',
+    checking:    'Vérification…',
+    indexed:     '✓ Indexée',
+    'not-indexed': '✗ Non indexée',
+    error:       '⚠ Erreur proxy'
+  };
+
   // ── Render list ────────────────────────────────────────────────────────────
   function render() {
-    const list = document.getElementById('url-list');
+    const list  = document.getElementById('url-list');
     const empty = document.getElementById('empty-msg');
-
     if (urls.length === 0) {
       list.innerHTML = '';
       list.appendChild(empty);
-      updateStats();
-      updateChart();
+      updateStats(); updateChart();
       return;
     }
-
     list.innerHTML = '';
     urls.forEach(item => {
       const li = document.createElement('li');
       li.className = 'url-item ' + item.status;
       li.dataset.id = item.id;
-
-      const labels = {
-        pending: '—',
-        checking: 'Vérification…',
-        indexed: '✓ Indexée',
-        'not-indexed': '✗ Non indexée'
-      };
-
       li.innerHTML = `
         <div class="status-dot"></div>
         <span class="url-text" title="${item.url}">${item.url}</span>
-        <span class="url-label">${labels[item.status] || '—'}</span>
+        <span class="url-label">${STATUS_LABEL[item.status] || '—'}</span>
         <button class="btn-remove" data-id="${item.id}" title="Supprimer">✕</button>
       `;
       list.appendChild(li);
     });
-
-    list.querySelectorAll('.btn-remove').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        removeUrl(btn.dataset.id);
-      });
-    });
-
-    updateStats();
-    updateChart();
-  }
-
-  // ── Stats ──────────────────────────────────────────────────────────────────
-  function updateStats() {
-    const total = urls.length;
-    const indexed = urls.filter(u => u.status === 'indexed').length;
-    const notIdx = urls.filter(u => u.status === 'not-indexed').length;
-    const pending = urls.filter(u => u.status === 'pending' || u.status === 'checking').length;
-
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-indexed').textContent = indexed;
-    document.getElementById('stat-not').textContent = notIdx;
-    document.getElementById('stat-pending').textContent = pending;
-  }
-
-  // ── Donut chart ────────────────────────────────────────────────────────────
-  function updateChart() {
-    const circumference = 2 * Math.PI * 70; // ≈ 439.8
-    const total = urls.length;
-    const indexed = urls.filter(u => u.status === 'indexed').length;
-    const notIdx = urls.filter(u => u.status === 'not-indexed').length;
-
-    const pctEl = document.getElementById('donut-pct');
-    const donutIdx = document.getElementById('donut-indexed');
-    const donutNot = document.getElementById('donut-not');
-
-    if (total === 0) {
-      donutIdx.setAttribute('stroke-dasharray', `0 ${circumference}`);
-      donutNot.setAttribute('stroke-dasharray', `0 ${circumference}`);
-      pctEl.textContent = '—';
-      return;
-    }
-
-    const checkedCount = indexed + notIdx;
-    if (checkedCount === 0) {
-      donutIdx.setAttribute('stroke-dasharray', `0 ${circumference}`);
-      donutNot.setAttribute('stroke-dasharray', `0 ${circumference}`);
-      pctEl.textContent = '—';
-      return;
-    }
-
-    const pct = Math.round((indexed / checkedCount) * 100);
-    pctEl.textContent = pct + '%';
-
-    const idxArc = (indexed / total) * circumference;
-    const notArc = (notIdx / total) * circumference;
-    const gap = circumference - idxArc - notArc;
-
-    // Stack: indexed first, then not-indexed, remaining = pending (gray bg)
-    donutIdx.setAttribute('stroke-dasharray', `${idxArc} ${circumference - idxArc}`);
-    donutIdx.setAttribute('stroke-dashoffset', '0');
-
-    donutNot.setAttribute('stroke-dasharray', `${notArc} ${circumference - notArc}`);
-    donutNot.setAttribute('stroke-dashoffset', `-${idxArc}`);
-  }
-
-  // ── Check indexation via Google site: query ────────────────────────────────
-  // Strategy: use a CORS-friendly approach via Google's public search API hint.
-  // Since direct fetch to Google is blocked by CORS, we use a proxy-free method:
-  // We check via a custom Search API or fall back to opening tabs.
-  // For real automation, we open google search result page and auto-detect.
-
-  async function checkUrl(item) {
-    item.status = 'checking';
-    renderItem(item);
-
-    try {
-      // Try fetching via allorigins proxy to check Google site: result count
-      const query = encodeURIComponent('site:' + item.url);
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/search?q=site:' + item.url + '&num=1')}`;
-
-      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
-      if (!res.ok) throw new Error('proxy error');
-
-      const data = await res.json();
-      const html = data.contents || '';
-
-      // Detect "did not match any documents" or result count
-      const noResults = html.includes('did not match any documents') ||
-                        html.includes('aucun document') ||
-                        html.includes('keine Ergebnisse') ||
-                        html.includes('No results') ||
-                        html.includes('n\'a renvoyé aucun résultat') ||
-                        html.includes('did not match') ||
-                        html.includes('0 résultat');
-
-      // Look for result stats text
-      const hasResults = html.includes('id="result-stats"') ||
-                         html.includes('resultStats') ||
-                         /About [\d,]+ result/i.test(html) ||
-                         /Environ [\d\s]+ résultat/i.test(html) ||
-                         html.includes('"tbas"') ||
-                         html.includes('data-ved');
-
-      if (noResults) {
-        item.status = 'not-indexed';
-      } else if (hasResults) {
-        item.status = 'indexed';
-      } else {
-        // Ambiguous — mark as not indexed (conservative)
-        item.status = 'not-indexed';
-      }
-    } catch (e) {
-      // Network error or timeout — mark pending so user can retry
-      item.status = 'pending';
-    }
-
-    renderItem(item);
-    save();
+    list.querySelectorAll('.btn-remove').forEach(btn =>
+      btn.addEventListener('click', e => { e.stopPropagation(); removeUrl(btn.dataset.id); })
+    );
+    updateStats(); updateChart();
   }
 
   function renderItem(item) {
     const li = document.querySelector(`[data-id="${item.id}"]`);
     if (!li) { render(); return; }
-
-    const labels = {
-      pending: '—',
-      checking: 'Vérification…',
-      indexed: '✓ Indexée',
-      'not-indexed': '✗ Non indexée'
-    };
-
     li.className = 'url-item ' + item.status;
-    li.querySelector('.url-label').textContent = labels[item.status] || '—';
-    updateStats();
-    updateChart();
+    li.querySelector('.url-label').textContent = STATUS_LABEL[item.status] || '—';
+    updateStats(); updateChart();
   }
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  function updateStats() {
+    const total   = urls.length;
+    const indexed = urls.filter(u => u.status === 'indexed').length;
+    const notIdx  = urls.filter(u => u.status === 'not-indexed').length;
+    const pending = urls.filter(u => ['pending','checking','error'].includes(u.status)).length;
+    document.getElementById('stat-total').textContent   = total;
+    document.getElementById('stat-indexed').textContent = indexed;
+    document.getElementById('stat-not').textContent     = notIdx;
+    document.getElementById('stat-pending').textContent = pending;
+  }
+
+  // ── Donut chart ────────────────────────────────────────────────────────────
+  function updateChart() {
+    const C = 2 * Math.PI * 70;
+    const total   = urls.length;
+    const indexed = urls.filter(u => u.status === 'indexed').length;
+    const notIdx  = urls.filter(u => u.status === 'not-indexed').length;
+    const pctEl   = document.getElementById('donut-pct');
+    const dIdx    = document.getElementById('donut-indexed');
+    const dNot    = document.getElementById('donut-not');
+
+    if (total === 0 || indexed + notIdx === 0) {
+      dIdx.setAttribute('stroke-dasharray', `0 ${C}`);
+      dNot.setAttribute('stroke-dasharray', `0 ${C}`);
+      pctEl.textContent = '—';
+      return;
+    }
+    const checked = indexed + notIdx;
+    const pct = Math.round((indexed / checked) * 100);
+    pctEl.textContent = pct + '%';
+
+    const idxArc = (indexed / total) * C;
+    const notArc = (notIdx  / total) * C;
+    dIdx.setAttribute('stroke-dasharray', `${idxArc} ${C - idxArc}`);
+    dIdx.setAttribute('stroke-dashoffset', '0');
+    dNot.setAttribute('stroke-dasharray', `${notArc} ${C - notArc}`);
+    dNot.setAttribute('stroke-dashoffset', `-${idxArc}`);
+  }
+
+  // ── Fetch Google via proxy with fallbacks ──────────────────────────────────
+  async function fetchGoogleHtml(pageUrl) {
+    const googleUrl = 'https://www.google.com/search?q=' + encodeURIComponent('site:' + pageUrl) + '&num=1&hl=fr';
+
+    // Proxy 1: allorigins (returns JSON with .contents)
+    try {
+      const r = await fetch(
+        'https://api.allorigins.win/get?url=' + encodeURIComponent(googleUrl),
+        { signal: AbortSignal.timeout(9000) }
+      );
+      if (r.ok) {
+        const d = await r.json();
+        if (d.contents && d.contents.length > 300) return d.contents;
+      }
+    } catch {}
+
+    // Proxy 2: corsproxy.io (returns raw HTML)
+    try {
+      const r = await fetch(
+        'https://corsproxy.io/?' + encodeURIComponent(googleUrl),
+        { signal: AbortSignal.timeout(9000) }
+      );
+      if (r.ok) {
+        const t = await r.text();
+        if (t.length > 300) return t;
+      }
+    } catch {}
+
+    return null;
+  }
+
+  // ── Detect indexation from Google HTML ────────────────────────────────────
+  function detectStatus(html) {
+    if (!html) return 'error';
+
+    const NO_RESULT_PATTERNS = [
+      /did not match any documents/i,
+      /n['']a pas renvoy[eé]/i,
+      /aucun r[eé]sultat/i,
+      /aucun document/i,
+      /no results found/i,
+      /did not match/i,
+      /keine.*ergebnisse/i,
+      /votre recherche.*n.*renvoy/i,
+    ];
+
+    const YES_RESULT_PATTERNS = [
+      /result-stats/i,
+      /resultStats/i,
+      /About [\d, ]+result/i,
+      /Environ [\d\s]+r[eé]sultat/i,
+      /"sitelinks"/i,
+      /data-sokoban-container/i,
+      /<h3[^>]*class="[^"]*LC20lb/i,
+    ];
+
+    for (const p of NO_RESULT_PATTERNS) if (p.test(html)) return 'not-indexed';
+    for (const p of YES_RESULT_PATTERNS) if (p.test(html)) return 'indexed';
+
+    // Heuristic: if the HTML has typical Google result markup
+    if (html.includes('data-ved') && html.includes('<a href')) return 'indexed';
+
+    return 'error'; // Can't determine → show error instead of silent wrong result
+  }
+
+  // ── Check one URL ─────────────────────────────────────────────────────────
+  async function checkUrl(item) {
+    item.status = 'checking';
+    renderItem(item);
+
+    const html = await fetchGoogleHtml(item.url);
+    item.status = detectStatus(html);
+
+    renderItem(item);
+    save();
+  }
+
+  // ── Format seconds as mm:ss ────────────────────────────────────────────────
+  function fmtTime(s) {
+    if (s < 60) return s + 's';
+    return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+  }
+
+  // ── Check all (parallel batches) ───────────────────────────────────────────
+  const BATCH_SIZE  = 3;   // parallel requests
+  const BATCH_DELAY = 700; // ms between batches (avoid rate-limit)
 
   async function checkAll(resetFirst = false) {
     if (checking) return;
@@ -703,45 +717,82 @@
     document.getElementById('btn-check').disabled = true;
     document.getElementById('btn-refresh').disabled = true;
 
-    const toCheck = urls.filter(u => u.status === 'pending');
+    const toCheck = urls.filter(u => u.status === 'pending' || u.status === 'error');
     const total = toCheck.length;
-    let done = 0;
-
-    const progressWrap = document.getElementById('progress-wrap');
-    const progressBar = document.getElementById('progress-bar');
-    const progressLabel = document.getElementById('progress-label');
-    progressWrap.style.display = 'block';
-
-    for (const item of toCheck) {
-      await checkUrl(item);
-      done++;
-      const pct = Math.round((done / total) * 100);
-      progressBar.style.width = pct + '%';
-      progressLabel.textContent = `${done} / ${total} vérifiées`;
-      // Small delay to avoid rate limiting
-      await new Promise(r => setTimeout(r, 1200));
+    if (total === 0) {
+      checking = false;
+      document.getElementById('btn-check').disabled = false;
+      document.getElementById('btn-refresh').disabled = false;
+      return;
     }
 
+    const progressWrap  = document.getElementById('progress-wrap');
+    const progressBar   = document.getElementById('progress-bar');
+    const progressLabel = document.getElementById('progress-label');
+    const progressEta   = document.getElementById('progress-eta');
+    progressWrap.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    const startTime = Date.now();
+    let done = 0;
+
+    // Estimate: batch of 3 takes ~(9s timeout + 0.7s delay) worst case, but typically ~2–4s
+    const EST_PER_BATCH_MS = 3500; // optimistic
+    const totalBatches = Math.ceil(total / BATCH_SIZE);
+
+    const progressPct = document.getElementById('progress-pct');
+
+    function updateProgress() {
+      const pct = Math.round((done / total) * 100);
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+      progressLabel.textContent = `${done} / ${total} vérifiées`;
+
+      if (done > 0) {
+        const elapsed = Date.now() - startTime;
+        const msPerItem = elapsed / done;
+        const remaining = Math.ceil((total - done) * msPerItem / 1000);
+        progressEta.textContent = remaining > 0 ? `Temps restant estimé : ~${fmtTime(remaining)}` : '';
+      } else {
+        const estimate = Math.ceil(totalBatches * EST_PER_BATCH_MS / 1000);
+        progressEta.textContent = `Durée estimée : ~${fmtTime(estimate)}`;
+      }
+    }
+
+    updateProgress();
+
+    for (let i = 0; i < toCheck.length; i += BATCH_SIZE) {
+      const batch = toCheck.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(item => checkUrl(item)));
+      done += batch.length;
+      updateProgress();
+      if (i + BATCH_SIZE < toCheck.length) {
+        await new Promise(r => setTimeout(r, BATCH_DELAY));
+      }
+    }
+
+    progressBar.style.width = '100%';
+    progressPct.textContent = '100%';
     progressLabel.textContent = 'Vérification terminée ✓';
-    setTimeout(() => { progressWrap.style.display = 'none'; progressBar.style.width = '0%'; }, 2500);
+    progressEta.textContent = `Durée totale : ${fmtTime(Math.round((Date.now() - startTime) / 1000))}`;
+    setTimeout(() => {
+      progressWrap.style.display = 'none';
+      progressBar.style.width = '0%';
+      progressPct.textContent = '0%';
+      progressEta.textContent = '';
+    }, 3500);
 
     checking = false;
     document.getElementById('btn-check').disabled = false;
     document.getElementById('btn-refresh').disabled = false;
   }
 
-  // ── Open in Google (manual verify) ────────────────────────────────────────
-  function openGoogle(url) {
-    window.open('https://www.google.com/search?q=site:' + encodeURIComponent(url), '_blank');
-  }
-
-  // ── Click on URL item to open Google ──────────────────────────────────────
+  // ── Click URL → open Google manually ──────────────────────────────────────
   document.getElementById('url-list').addEventListener('click', e => {
     const li = e.target.closest('.url-item');
     if (!li || e.target.classList.contains('btn-remove')) return;
-    const id = li.dataset.id;
-    const item = urls.find(u => u.id === id);
-    if (item) openGoogle(item.url);
+    const item = urls.find(u => u.id === li.dataset.id);
+    if (item) window.open('https://www.google.com/search?q=site:' + encodeURIComponent(item.url), '_blank');
   });
 
   // ── Event listeners ────────────────────────────────────────────────────────
@@ -761,23 +812,19 @@
   });
 
   document.getElementById('btn-bulk-add').addEventListener('click', () => {
-    const lines = document.getElementById('bulk-input').value.split('\n');
-    lines.forEach(l => addUrl(l));
+    document.getElementById('bulk-input').value.split('\n').forEach(l => addUrl(l));
     document.getElementById('bulk-input').value = '';
     document.getElementById('bulk-area').classList.remove('open');
   });
 
   document.getElementById('btn-clear-all').addEventListener('click', () => {
     if (!confirm('Supprimer toutes les URLs ?')) return;
-    urls = [];
-    save();
-    render();
+    urls = []; save(); render();
   });
 
-  document.getElementById('btn-check').addEventListener('click', () => checkAll(false));
+  document.getElementById('btn-check').addEventListener('click',   () => checkAll(false));
   document.getElementById('btn-refresh').addEventListener('click', () => checkAll(true));
 
-  // ── Init ───────────────────────────────────────────────────────────────────
   render();
 </script>
 </body>
