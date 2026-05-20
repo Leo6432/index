@@ -159,9 +159,35 @@
     .bulk-area textarea:focus { border-color: var(--accent); }
 
     /* ── URL List ── */
+    .list-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 0 2px;
+    }
+    .sel-count {
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex: 1;
+    }
+    .sel-count strong { color: var(--accent); }
+    .sel-actions { display: flex; gap: 6px; }
+    .sel-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      padding: 3px 9px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .sel-btn:hover { border-color: var(--accent); color: var(--accent); }
+
     #url-list {
       list-style: none; display: flex; flex-direction: column;
-      gap: 8px; max-height: 380px; overflow-y: auto; padding-right: 4px;
+      gap: 8px; max-height: 360px; overflow-y: auto; padding-right: 4px;
     }
     #url-list::-webkit-scrollbar { width: 5px; }
     #url-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -170,13 +196,30 @@
       display: flex; align-items: center; gap: 10px;
       background: var(--card2); border: 1px solid var(--border);
       border-radius: 8px; padding: 10px 12px;
-      cursor: pointer; transition: border-color 0.2s;
+      transition: border-color 0.2s;
     }
-    .url-item:hover { border-color: var(--accent); }
+    .url-item.selected { border-color: var(--accent); background: rgba(108,99,255,0.08); }
     .url-item.indexed     { border-left: 3px solid var(--accent2); }
     .url-item.not-indexed { border-left: 3px solid var(--danger); }
     .url-item.checking    { border-left: 3px solid var(--accent); }
     .url-item.error       { border-left: 3px solid var(--warn); }
+    .url-item.selected.indexed     { border-left: 3px solid var(--accent2); border-color: var(--accent); }
+    .url-item.selected.not-indexed { border-left: 3px solid var(--danger);  border-color: var(--accent); }
+
+    /* Custom checkbox */
+    .url-check {
+      width: 16px; height: 16px; flex-shrink: 0;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      font-size: 11px; color: #fff;
+    }
+    .url-item.selected .url-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
 
     .status-dot {
       width: 10px; height: 10px; border-radius: 50%;
@@ -192,7 +235,9 @@
     .url-text {
       flex: 1; font-size: 0.82rem; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
+      cursor: pointer;
     }
+    .url-text:hover { color: var(--accent); }
     .url-label {
       font-size: 0.72rem; font-weight: 600;
       padding: 2px 8px; border-radius: 20px; white-space: nowrap;
@@ -384,6 +429,15 @@
       <div style="display:flex;gap:8px;margin-top:8px;">
         <button class="btn btn-outline btn-sm" id="btn-bulk-add">Importer</button>
         <button class="btn btn-outline btn-sm" style="border-color:var(--danger);color:var(--danger)" id="btn-clear-all">Tout supprimer</button>
+      </div>
+    </div>
+
+    <div class="list-header" id="list-header" style="display:none">
+      <span class="sel-count" id="sel-count">0 sélectionnée(s)</span>
+      <div class="sel-actions">
+        <button class="sel-btn" id="btn-sel-all">Tout</button>
+        <button class="sel-btn" id="btn-sel-none">Aucun</button>
+        <button class="sel-btn" id="btn-sel-invert">Inverser</button>
       </div>
     </div>
 
