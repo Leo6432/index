@@ -221,9 +221,12 @@
     .url-badge {
       font-size: 0.7rem; font-weight: 700;
       padding: 2px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      border: 1px solid transparent;
     }
-    .indexed     .url-badge { background: rgba(0,212,170,0.12); color: var(--green); }
-    .not-indexed .url-badge { background: rgba(255,92,114,0.12); color: var(--red); }
+    .url-badge:hover { opacity: 0.75; transform: scale(0.96); }
+    .indexed     .url-badge { background: rgba(0,212,170,0.12); color: var(--green); border-color: rgba(0,212,170,0.25); }
+    .not-indexed .url-badge { background: rgba(255,92,114,0.12); color: var(--red);   border-color: rgba(255,92,114,0.25); }
 
     .empty-state {
       text-align: center; color: var(--muted); padding: 40px 0; font-size: 0.9rem;
@@ -658,7 +661,25 @@
     ['https://meteomayenne.fr/brains-sur-les-marches','not-indexed'],
   ];
 
-  const urls = PRELOADED.map(([url, status]) => ({ url, status }));
+  // Load overrides from localStorage, fall back to PRELOADED
+  const savedOverrides = JSON.parse(localStorage.getItem('seo_overrides') || '{}');
+  const urls = PRELOADED.map(([url, status]) => ({
+    url,
+    status: savedOverrides[url] || status,
+  }));
+
+  function saveOverrides() {
+    const overrides = {};
+    urls.forEach(u => { overrides[u.url] = u.status; });
+    localStorage.setItem('seo_overrides', JSON.stringify(overrides));
+  }
+
+  function toggleStatus(item) {
+    item.status = item.status === 'indexed' ? 'not-indexed' : 'indexed';
+    saveOverrides();
+    renderList();
+    updateStats();
+  }
 
   let currentFilter = 'all';
 
@@ -686,13 +707,18 @@
     filtered.forEach(item => {
       const li = document.createElement('li');
       li.className = 'url-item ' + item.status;
-      li.title = item.url;
+      li.title = 'Cliquer pour ouvrir — cliquer sur le badge pour changer le statut';
+      const badgeLabel = item.status === 'indexed' ? '✓ Indexée' : '✗ Non indexée';
       li.innerHTML = `
         <div class="status-dot"></div>
         <span class="url-slug">${slug(item.url)}</span>
-        <span class="url-badge">${item.status === 'indexed' ? '✓ Indexée' : '✗ Non indexée'}</span>
+        <span class="url-badge" title="Cliquer pour basculer le statut">${badgeLabel}</span>
       `;
-      li.addEventListener('click', () => window.open(item.url, '_blank'));
+      li.querySelector('.url-badge').addEventListener('click', e => {
+        e.stopPropagation();
+        toggleStatus(item);
+      });
+      li.querySelector('.url-slug').addEventListener('click', () => window.open(item.url, '_blank'));
       list.appendChild(li);
     });
   }
