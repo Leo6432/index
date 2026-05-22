@@ -242,6 +242,9 @@
       font-size: 0.72rem; font-weight: 600;
       padding: 2px 8px; border-radius: 20px; white-space: nowrap;
     }
+    .url-date {
+      font-size: 0.7rem; color: var(--muted); white-space: nowrap; flex-shrink: 0;
+    }
     .indexed     .url-label { background: rgba(0,212,170,0.15);  color: var(--accent2); }
     .not-indexed .url-label { background: rgba(255,92,114,0.15); color: var(--danger); }
     .checking    .url-label { background: rgba(108,99,255,0.15); color: var(--accent); }
@@ -543,6 +546,87 @@ function jsonp(cb, obj) {
 </div>
 
 <script>
+  // ── URLs pré-chargées ─────────────────────────────────────────────────────
+  const PRELOADED = [
+    ['https://meteomayenne.fr/sace','not-indexed'],
+    ['https://meteomayenne.fr/saint-aignan-de-couptrain','not-indexed'],
+    ['https://meteomayenne.fr/saint-aignan-sur-roe','not-indexed'],
+    ['https://meteomayenne.fr/saint-aubins-des-fosses','not-indexed'],
+    ['https://meteomayenne.fr/saint-aubins-du-desert','not-indexed'],
+    ['https://meteomayenne.fr/saint-baudelle','not-indexed'],
+    ['https://meteomayenne.fr/saint-berthevin','not-indexed'],
+    ['https://meteomayenne.fr/saint-berthevin-la-tanniere','not-indexed'],
+    ['https://meteomayenne.fr/saint-brice','not-indexed'],
+    ['https://meteomayenne.fr/saint-calais-du-desert','not-indexed'],
+    ['https://meteomayenne.fr/saint-cenere','not-indexed'],
+    ['https://meteomayenne.fr/saint-charles-la-foret','not-indexed'],
+    ['https://meteomayenne.fr/saint-christophe-du-luat','not-indexed'],
+    ['https://meteomayenne.fr/saint-cyr-en-pail','not-indexed'],
+    ['https://meteomayenne.fr/saint-cyr-le-gravelais','not-indexed'],
+    ['https://meteomayenne.fr/saint-denis-d-anjou','not-indexed'],
+    ['https://meteomayenne.fr/saint-denis-de-gastines','not-indexed'],
+    ['https://meteomayenne.fr/saint-denis-du-maine','not-indexed'],
+    ['https://meteomayenne.fr/saint-ellier-du-maine','not-indexed'],
+    ['https://meteomayenne.fr/saint-erblon','not-indexed'],
+    ['https://meteomayenne.fr/saint-fort','not-indexed'],
+    ['https://meteomayenne.fr/saint-fraimbault-de-prieres','not-indexed'],
+    ['https://meteomayenne.fr/saint-georges-buttavent','not-indexed'],
+    ['https://meteomayenne.fr/saint-georges-le-flechard','not-indexed'],
+    ['https://meteomayenne.fr/saint-georges-sur-erve','not-indexed'],
+    ['https://meteomayenne.fr/saint-germain-d-anxure','not-indexed'],
+    ['https://meteomayenne.fr/saint-germain-de-coulamer','not-indexed'],
+    ['https://meteomayenne.fr/saint-germain-le-fouilloux','not-indexed'],
+    ['https://meteomayenne.fr/saint-germain-le-guillaume','not-indexed'],
+    ['https://meteomayenne.fr/saint-hilaire-du-maine','not-indexed'],
+    ['https://meteomayenne.fr/saint-jean-sur-erve','not-indexed'],
+    ['https://meteomayenne.fr/saint-jean-sur-mayenne','not-indexed'],
+    ['https://meteomayenne.fr/saint-julien-du-terroux','not-indexed'],
+    ['https://meteomayenne.fr/saint-laurent-des-mortiers','not-indexed'],
+    ['https://meteomayenne.fr/saint-leger','not-indexed'],
+    ['https://meteomayenne.fr/saint-loup-du-dorat','not-indexed'],
+    ['https://meteomayenne.fr/saint-loup-du-gast','not-indexed'],
+    ['https://meteomayenne.fr/saint-mars-du-desert','not-indexed'],
+    ['https://meteomayenne.fr/saint-mars-sur-colmont','not-indexed'],
+    ['https://meteomayenne.fr/saint-mars-sur-la-futaie','not-indexed'],
+    ['https://meteomayenne.fr/saint-martin-de-connee','not-indexed'],
+    ['https://meteomayenne.fr/saint-martin-du-limet','not-indexed'],
+    ['https://meteomayenne.fr/saint-michel-de-feins','not-indexed'],
+    ['https://meteomayenne.fr/saint-michel-de-la-roe','not-indexed'],
+    ['https://meteomayenne.fr/saint-ouen-des-toits','not-indexed'],
+    ['https://meteomayenne.fr/saint-ouen-des-vallons','not-indexed'],
+    ['https://meteomayenne.fr/saint-pierre-des-landes','not-indexed'],
+    ['https://meteomayenne.fr/saint-pierre-des-nids','not-indexed'],
+    ['https://meteomayenne.fr/saint-pierre-la-cour','not-indexed'],
+    ['https://meteomayenne.fr/saint-pierre-sur-erve','not-indexed'],
+    ['https://meteomayenne.fr/saint-poix','not-indexed'],
+    ['https://meteomayenne.fr/saint-quentin-les-anges','not-indexed'],
+    ['https://meteomayenne.fr/saint-samson','not-indexed'],
+    ['https://meteomayenne.fr/saint-saturnin-du-limet','not-indexed'],
+    ['https://meteomayenne.fr/saint-sulpice','not-indexed'],
+    ['https://meteomayenne.fr/saint-thomas-de-courceriers','not-indexed'],
+    ['https://meteomayenne.fr/sainte-gemmes-le-robert','not-indexed'],
+    ['https://meteomayenne.fr/sainte-marie-du-bois','not-indexed'],
+    ['https://meteomayenne.fr/sainte-suzanne-et-chammes','not-indexed'],
+    ['https://meteomayenne.fr/saulges','not-indexed'],
+    ['https://meteomayenne.fr/la-selle-craonnaise','not-indexed'],
+    ['https://meteomayenne.fr/senonnes','not-indexed'],
+    ['https://meteomayenne.fr/simple','not-indexed'],
+    ['https://meteomayenne.fr/souce','not-indexed'],
+    ['https://meteomayenne.fr/soulge-sur-ouette','not-indexed'],
+    ['https://meteomayenne.fr/thorigne-en-charnie','not-indexed'],
+    ['https://meteomayenne.fr/thuboeuf','not-indexed'],
+    ['https://meteomayenne.fr/torce-viviers-en-charnie','not-indexed'],
+    ['https://meteomayenne.fr/trans','not-indexed'],
+    ['https://meteomayenne.fr/vaiges','not-indexed'],
+    ['https://meteomayenne.fr/vautorte','not-indexed'],
+    ['https://meteomayenne.fr/vieuvy','indexed'],
+    ['https://meteomayenne.fr/villaines-la-juhel','not-indexed'],
+    ['https://meteomayenne.fr/villepail','not-indexed'],
+    ['https://meteomayenne.fr/villiers-charlemagne','not-indexed'],
+    ['https://meteomayenne.fr/vimarce','not-indexed'],
+    ['https://meteomayenne.fr/voutre','not-indexed'],
+  ];
+
   // ── Config ────────────────────────────────────────────────────────────────
   let cfg = JSON.parse(localStorage.getItem('seo_cfg') || '{}');
   // cfg: { scriptUrl }
@@ -640,9 +724,11 @@ function jsonp(cb, obj) {
       const li = document.createElement('li');
       li.className  = 'url-item ' + item.status;
       li.dataset.id = item.id;
+      const dateStr = item.checkedAt ? `<span class="url-date">${item.checkedAt}</span>` : '';
       li.innerHTML  = `
         <div class="status-dot"></div>
         <span class="url-text" title="${item.url}">${item.url}</span>
+        ${dateStr}
         <span class="url-label">${STATUS_LABEL[item.status] || '—'}</span>
         <button class="btn-remove" data-id="${item.id}" title="Supprimer">✕</button>
       `;
@@ -659,6 +745,16 @@ function jsonp(cb, obj) {
     if (!li) { render(); return; }
     li.className = 'url-item ' + item.status;
     li.querySelector('.url-label').textContent = STATUS_LABEL[item.status] || '—';
+    const dateEl = li.querySelector('.url-date');
+    if (item.checkedAt) {
+      if (dateEl) dateEl.textContent = item.checkedAt;
+      else {
+        const span = document.createElement('span');
+        span.className = 'url-date';
+        span.textContent = item.checkedAt;
+        li.querySelector('.url-label').before(span);
+      }
+    }
     updateStats(); updateChart();
   }
 
@@ -750,15 +846,19 @@ function jsonp(cb, obj) {
   }
 
   // ── Check one URL ─────────────────────────────────────────────────────────
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   async function checkUrl(item) {
     item.status = 'checking';
     renderItem(item);
     const result = await checkViaGoogleApi(item.url);
     item.status = result.status === 'quota' ? 'error' : result.status;
     if (result.status === 'quota') {
-      // Stop everything — quota exceeded
       return 'quota';
     }
+    item.checkedAt = todayStr();
     renderItem(item);
     save();
     return 'ok';
@@ -886,6 +986,15 @@ function jsonp(cb, obj) {
   document.getElementById('btn-refresh').addEventListener('click', () => checkAll(true));
 
   // ── Init ──────────────────────────────────────────────────────────────────
+  // Merge PRELOADED entries into urls (skip duplicates, keep existing status)
+  const PRELOAD_DATE = '2026-05-22';
+  PRELOADED.forEach(([url, status]) => {
+    if (!urls.find(u => u.url === url)) {
+      urls.push({ id: genId(), url, status, checkedAt: PRELOAD_DATE });
+    }
+  });
+  save();
+
   updateApiBadge();
   render();
 </script>
