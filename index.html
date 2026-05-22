@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEO Index Dashboard</title>
+  <title>SEO Dashboard — meteomayenne.fr</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f1117;
-      --card: #1a1d27;
-      --card2: #21253a;
-      --border: #2e3350;
-      --accent: #6c63ff;
-      --accent2: #00d4aa;
-      --danger: #ff5c72;
-      --warn: #f59e0b;
-      --text: #e2e8f0;
-      --muted: #8892b0;
-      --radius: 12px;
+      --bg:      #0b0d14;
+      --surface: #12151f;
+      --card:    #181c2a;
+      --card2:   #1e2235;
+      --border:  #252a3f;
+      --accent:  #6c63ff;
+      --green:   #00d4aa;
+      --red:     #ff5c72;
+      --text:    #e2e8f0;
+      --muted:   #8892b0;
+      --radius:  14px;
     }
 
     body {
@@ -26,426 +26,367 @@
       color: var(--text);
       font-family: 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
-      padding: 24px;
     }
 
-    /* ── Header ── */
-    header {
+    /* ── HERO HEADER ─────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #0f1225 0%, #1a1040 50%, #0f1225 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 36px 40px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 32px;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
+      gap: 20px;
     }
-
-    header .logo {
-      width: 40px; height: 40px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 10px;
+    .hero-icon {
+      width: 52px; height: 52px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
+      font-size: 24px;
+      box-shadow: 0 8px 24px rgba(108,99,255,0.35);
     }
-
-    header h1 { font-size: 1.5rem; font-weight: 700; }
-    header p  { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
-
-    .api-badge {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--card);
+    .hero-title { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.02em; }
+    .hero-sub   { color: var(--muted); font-size: 0.9rem; margin-top: 3px; }
+    .hero-date {
+      margin-left: auto; flex-shrink: 0;
+      background: rgba(255,255,255,0.05);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      flex-shrink: 0;
+      padding: 6px 16px;
+      font-size: 0.82rem; color: var(--muted);
     }
-    .api-badge:hover { border-color: var(--accent); }
-    .api-badge .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--muted);
-    }
-    .api-badge.ok   .dot { background: var(--accent2); }
-    .api-badge.warn .dot { background: var(--warn); }
-    .api-badge.ok   .api-label { color: var(--accent2); }
-    .api-badge.warn .api-label { color: var(--warn); }
+    .hero-date strong { color: var(--text); }
 
-    /* ── Grid ── */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 20px;
-      max-width: 1200px;
+    /* ── STAT STRIP ──────────────────────────────── */
+    .stat-strip {
+      max-width: 1100px;
       margin: 0 auto;
+      padding: 28px 40px 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
     }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .stat-strip { grid-template-columns: repeat(2,1fr); } }
 
-    /* ── Card ── */
-    .card {
+    .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
     }
-    .card h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+    .stat-card.total::after   { background: var(--accent); }
+    .stat-card.indexed::after { background: var(--green); }
+    .stat-card.notidx::after  { background: var(--red); }
+    .stat-card.pct::after     { background: linear-gradient(90deg, var(--accent), var(--green)); }
+
+    .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-val   { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+    .stat-card.total   .stat-val { color: var(--accent); }
+    .stat-card.indexed .stat-val { color: var(--green); }
+    .stat-card.notidx  .stat-val { color: var(--red); }
+    .stat-card.pct     .stat-val {
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
-    /* ── Inputs (modal only) ── */
-    .field-input {
-      flex: 1;
+    /* ── MAIN CONTENT ────────────────────────────── */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 40px 48px;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) { .main { grid-template-columns: 1fr; padding: 20px; } }
+    @media (max-width: 700px) { .stat-strip { padding: 20px 20px 0; } .hero { padding: 24px 20px; } }
+
+    /* ── URL LIST ────────────────────────────────── */
+    .list-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .list-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .list-head-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .list-count {
+      font-size: 0.78rem;
+      color: var(--muted);
       background: var(--card2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
+      border-radius: 20px;
+      padding: 2px 10px;
     }
-    .field-input:focus { border-color: var(--accent); }
-    .field-input::placeholder { color: var(--muted); }
 
-    /* ── Buttons ── */
-    .btn {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
+    /* Filter tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
       padding: 10px 18px;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 600;
+      color: var(--muted);
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      white-space: nowrap;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .btn:hover   { opacity: 0.85; }
-    .btn:active  { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
-    .btn-sm { padding: 7px 14px; font-size: 0.82rem; }
-    .btn-success { background: var(--accent2); }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .tab.active.green-tab { border-bottom-color: var(--green); color: var(--green); }
+    .tab.active.red-tab   { border-bottom-color: var(--red);   color: var(--red); }
 
-    /* ── URL List ── */
     #url-list {
-      list-style: none; display: flex; flex-direction: column;
-      gap: 8px; max-height: 520px; overflow-y: auto; padding-right: 4px;
+      list-style: none;
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    #url-list::-webkit-scrollbar { width: 5px; }
+    #url-list::-webkit-scrollbar { width: 4px; }
     #url-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
     .url-item {
       display: flex; align-items: center; gap: 10px;
-      background: var(--card2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 12px;
-      transition: border-color 0.2s;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .url-item.indexed     { border-left: 3px solid var(--accent2); }
-    .url-item.not-indexed { border-left: 3px solid var(--danger); }
-    .url-item.checking    { border-left: 3px solid var(--accent); }
-    .url-item.error       { border-left: 3px solid var(--warn); }
+    .url-item:hover { background: var(--card2); border-color: var(--border); }
+    .url-item.indexed     { border-left: 3px solid var(--green); }
+    .url-item.not-indexed { border-left: 3px solid var(--red); }
 
     .status-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: var(--border); flex-shrink: 0;
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
     }
-    .indexed     .status-dot { background: var(--accent2); }
-    .not-indexed .status-dot { background: var(--danger); }
-    .error       .status-dot { background: var(--warn); }
-    .checking    .status-dot { background: var(--accent); animation: pulse 1s infinite; }
+    .indexed     .status-dot { background: var(--green); }
+    .not-indexed .status-dot { background: var(--red); }
 
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-    .url-text {
-      flex: 1; font-size: 0.82rem; overflow: hidden;
-      text-overflow: ellipsis; white-space: nowrap;
-      cursor: pointer;
+    .url-slug {
+      flex: 1;
+      font-size: 0.83rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
     }
-    .url-text:hover { color: var(--accent); }
-    .url-label {
-      font-size: 0.72rem; font-weight: 600;
-      padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+    .url-badge {
+      font-size: 0.7rem; font-weight: 700;
+      padding: 2px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
     }
-    .url-date {
-      font-size: 0.7rem; color: var(--muted); white-space: nowrap; flex-shrink: 0;
-    }
-    .indexed     .url-label { background: rgba(0,212,170,0.15);  color: var(--accent2); }
-    .not-indexed .url-label { background: rgba(255,92,114,0.15); color: var(--danger); }
-    .checking    .url-label { background: rgba(108,99,255,0.15); color: var(--accent); }
-    .error       .url-label { background: rgba(245,158,11,0.15); color: var(--warn); }
+    .indexed     .url-badge { background: rgba(0,212,170,0.12); color: var(--green); }
+    .not-indexed .url-badge { background: rgba(255,92,114,0.12); color: var(--red); }
 
     .empty-state {
       text-align: center; color: var(--muted); padding: 40px 0; font-size: 0.9rem;
     }
 
-    /* ── Right col ── */
-    .right-col { display: flex; flex-direction: column; gap: 20px; }
+    /* ── RIGHT SIDEBAR ───────────────────────────── */
+    .sidebar { display: flex; flex-direction: column; gap: 18px; }
 
-    /* ── Stats ── */
-    .stats-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px;
+    .side-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
     }
-    .stat-box {
-      background: var(--card2); border-radius: 10px; padding: 16px; text-align: center;
+    .side-title {
+      font-size: 0.78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin-bottom: 16px;
     }
-    .stat-val { font-size: 2rem; font-weight: 700; line-height: 1; }
-    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-    .stat-val.green  { color: var(--accent2); }
-    .stat-val.red    { color: var(--danger); }
-    .stat-val.purple { color: var(--accent); }
 
-    /* ── Progress ── */
-    #progress-wrap { margin-top: 16px; }
-    .progress-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
-    }
-    .progress-label { font-size: 0.82rem; font-weight: 600; }
-    .progress-pct   { font-size: 0.82rem; font-weight: 700; color: var(--accent); }
-    .progress-bar-wrap {
-      background: var(--card2); border-radius: 20px; height: 8px; overflow: hidden;
-    }
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 20px; transition: width 0.4s ease; width: 0%;
-    }
-    .progress-eta { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 4px; }
-
-    /* ── Donut ── */
-    .chart-wrap { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
-    .donut-container { position: relative; width: 180px; height: 180px; }
+    /* Donut */
+    .donut-wrap { display: flex; flex-direction: column; align-items: center; }
+    .donut-container { position: relative; width: 160px; height: 160px; }
     .donut-container svg { transform: rotate(-90deg); }
     .donut-text {
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%,-50%); text-align: center;
     }
     .donut-pct {
-      font-size: 2.2rem; font-weight: 800; line-height: 1;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      font-size: 2rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--accent), var(--green));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .donut-sub { font-size: 0.72rem; color: var(--muted); }
-    .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px; justify-content: center; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+    .donut-sub { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+
+    .legend { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; width: 100%; }
+    .legend-item {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.8rem;
+    }
+    .legend-left { display: flex; align-items: center; gap: 8px; }
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-count { font-weight: 700; }
 
-    /* ── Action row ── */
-    .action-row { display: flex; gap: 8px; }
-    .action-row .btn { flex: 1; }
-
-    /* ── Notice ── */
-    .notice {
-      background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.3);
-      border-radius: 8px; padding: 10px 14px; font-size: 0.78rem;
-      color: var(--muted); line-height: 1.6; margin-top: 14px;
+    /* Mini bar */
+    .mini-bar-wrap { margin-top: 18px; }
+    .mini-bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.75rem; color: var(--muted); margin-bottom: 6px;
     }
-    .notice strong { color: var(--text); }
-    .notice code {
-      background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em;
+    .mini-bar-bg {
+      background: var(--card2); border-radius: 6px; height: 8px; overflow: hidden;
     }
-
-    /* ── Modal ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7); z-index: 100;
-      align-items: center; justify-content: center;
+    .mini-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--accent));
+      border-radius: 6px;
+      transition: width 0.6s ease;
     }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px; width: 100%; max-width: 480px;
-      margin: 16px;
-    }
-    .modal h3 { font-size: 1.1rem; margin-bottom: 6px; }
-    .modal .sub { color: var(--muted); font-size: 0.83rem; margin-bottom: 20px; line-height: 1.5; }
-    .field-label {
-      font-size: 0.8rem; font-weight: 600; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;
-    }
-    .field-group { margin-bottom: 14px; }
-    .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
-    .modal-actions .btn { flex: 1; }
-
-    .steps {
-      background: var(--card2); border-radius: 8px; padding: 12px 14px;
-      font-size: 0.78rem; line-height: 1.8; color: var(--muted); margin-bottom: 16px;
-    }
-    .steps strong { color: var(--text); }
-    .steps a { color: var(--accent); text-decoration: none; }
-    .steps a:hover { text-decoration: underline; }
-
-    .quota-info {
-      font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 8px;
-    }
-    .quota-info span { color: var(--accent2); font-weight: 600; }
   </style>
 </head>
 <body>
 
-<!-- ── Settings Modal ── -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <h3>⚙ Configuration</h3>
-    <p class="sub">
-      Créez un <strong>Google Apps Script</strong> gratuit qui sert de proxy — aucune clé API, aucun moteur CSE.
-    </p>
-
-    <div class="steps">
-      <strong>1.</strong> Ouvrez
-      <a href="https://script.google.com" target="_blank">script.google.com</a>
-      → <em>Nouveau projet</em><br>
-      <strong>2.</strong> Effacez le code existant et collez le code ci-dessous<br>
-      <strong>3.</strong> Cliquez <em>Déployer → Nouveau déploiement</em><br>
-      <strong>4.</strong> Type : <em>Application Web</em> — Accès : <em>Tout le monde</em><br>
-      <strong>5.</strong> Copiez l'URL du déploiement et collez-la ci-dessous
+<!-- ── HEADER ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-icon">&#127760;</div>
+    <div>
+      <div class="hero-title">meteomayenne.fr</div>
+      <div class="hero-sub">Suivi d'indexation Google — 1ère moitié</div>
     </div>
-
-    <div style="position:relative;margin-bottom:14px">
-      <pre id="script-code" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.72rem;overflow-x:auto;line-height:1.6;color:var(--text)">function doGet(e) {
-  var url = e.parameter.url;
-  var cb  = e.parameter.callback || 'callback';
-  if (!url) return jsonp(cb, {status:'error', msg:'no url'});
-  try {
-    var res = UrlFetchApp.fetch(
-      'https://www.google.com/search?q=site:' + encodeURIComponent(url) + '&num=1&hl=fr',
-      { headers: {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124'},
-        followRedirects: true, muteHttpExceptions: true }
-    );
-    var html = res.getContentText();
-    var no  = /did not match any documents|n.a pas renvoy|aucun r.sultat|aucun document/i.test(html);
-    var yes = /id="result-stats"|class="LC20lb|Environ.*r.sultat|About.*result/i.test(html);
-    return jsonp(cb, {status: no ? 'not-indexed' : yes ? 'indexed' : 'error'});
-  } catch(err) {
-    return jsonp(cb, {status:'error', msg: err.message});
-  }
-}
-function jsonp(cb, obj) {
-  return ContentService.createTextOutput(cb + '(' + JSON.stringify(obj) + ')')
-    .setMimeType(ContentService.MimeType.JAVASCRIPT);
-}</pre>
-      <button class="btn btn-outline btn-sm" id="btn-copy-script" style="position:absolute;top:8px;right:8px">Copier</button>
-    </div>
-
-    <div class="field-group">
-      <label class="field-label">URL du déploiement Apps Script</label>
-      <input class="field-input" id="cfg-script-url" placeholder="https://script.google.com/macros/s/…/exec" />
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-outline" id="btn-modal-cancel">Annuler</button>
-      <button class="btn btn-success" id="btn-modal-save">Enregistrer</button>
-    </div>
+    <div class="hero-date">Mise à jour le <strong>22 mai 2026</strong></div>
   </div>
 </div>
 
-<!-- ── Header ── -->
-<header>
-  <div class="logo">&#128269;</div>
-  <div>
-    <h1>SEO Index Dashboard</h1>
-    <p>Vérifiez l'indexation Google de vos pages</p>
+<!-- ── STATS ── -->
+<div class="stat-strip">
+  <div class="stat-card total">
+    <div class="stat-label">Pages totales</div>
+    <div class="stat-val" id="stat-total">—</div>
   </div>
-  <div class="api-badge" id="api-badge" title="Configurer l'API Google">
-    <div class="dot"></div>
-    <span class="api-label" id="api-label">API non configurée</span>
-    <span style="color:var(--muted);margin-left:2px">⚙</span>
+  <div class="stat-card indexed">
+    <div class="stat-label">Indexées</div>
+    <div class="stat-val" id="stat-indexed">—</div>
   </div>
-</header>
+  <div class="stat-card notidx">
+    <div class="stat-label">Non indexées</div>
+    <div class="stat-val" id="stat-not">—</div>
+  </div>
+  <div class="stat-card pct">
+    <div class="stat-label">Taux d'indexation</div>
+    <div class="stat-val" id="stat-pct">—</div>
+  </div>
+</div>
 
-<div class="grid">
+<!-- ── MAIN ── -->
+<div class="main">
 
-  <!-- LEFT -->
-  <div class="card">
-    <h2>Pages meteomayenne.fr <span style="font-size:0.75rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— 22 mai 2026</span></h2>
-
+  <!-- Liste -->
+  <div class="list-card">
+    <div class="list-head">
+      <span class="list-head-title">Pages</span>
+      <span class="list-count" id="list-count">0 pages</span>
+    </div>
+    <div class="filter-tabs">
+      <button class="tab active"     data-filter="all"         onclick="setFilter('all',this)">Toutes</button>
+      <button class="tab green-tab"  data-filter="indexed"     onclick="setFilter('indexed',this)">Indexées</button>
+      <button class="tab red-tab"    data-filter="not-indexed" onclick="setFilter('not-indexed',this)">Non indexées</button>
+    </div>
     <ul id="url-list">
-      <li class="empty-state" id="empty-msg">Chargement…</li>
+      <li class="empty-state">Chargement…</li>
     </ul>
   </div>
 
-  <!-- RIGHT -->
-  <div class="right-col">
+  <!-- Sidebar -->
+  <div class="sidebar">
 
-    <div class="card">
-      <h2>Résumé</h2>
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-val purple" id="stat-total">0</div>
-          <div class="stat-label">Pages totales</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-val green" id="stat-indexed">0</div>
-          <div class="stat-label">Indexées</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-val red" id="stat-not">0</div>
-          <div class="stat-label">Non indexées</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-val" id="stat-pending" style="color:var(--muted)">0</div>
-          <div class="stat-label">En attente</div>
-        </div>
-      </div>
-
-      <div id="progress-wrap" style="display:none">
-        <div class="progress-header">
-          <span class="progress-label" id="progress-label">0 / 0 vérifiées</span>
-          <span class="progress-pct"   id="progress-pct">0%</span>
-        </div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar" id="progress-bar"></div>
-        </div>
-        <div class="progress-eta" id="progress-eta"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Indexation</h2>
-      <div class="chart-wrap">
+    <div class="side-card">
+      <div class="side-title">Indexation</div>
+      <div class="donut-wrap">
         <div class="donut-container">
-          <svg width="180" height="180" viewBox="0 0 180 180">
-            <circle cx="90" cy="90" r="70" fill="none" stroke="#2e3350" stroke-width="22"/>
-            <circle id="donut-indexed" cx="90" cy="90" r="70" fill="none"
-              stroke="#00d4aa" stroke-width="22" stroke-dasharray="0 440"
-              stroke-linecap="round" style="transition:stroke-dasharray 0.6s ease"/>
-            <circle id="donut-not" cx="90" cy="90" r="70" fill="none"
-              stroke="#ff5c72" stroke-width="22" stroke-dasharray="0 440"
-              stroke-linecap="round" style="transition:stroke-dasharray 0.6s ease"/>
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="60" fill="none" stroke="#252a3f" stroke-width="20"/>
+            <circle id="donut-not" cx="80" cy="80" r="60" fill="none"
+              stroke="#ff5c72" stroke-width="20" stroke-dasharray="0 377"
+              style="transition:stroke-dasharray 0.7s ease"/>
+            <circle id="donut-indexed" cx="80" cy="80" r="60" fill="none"
+              stroke="#00d4aa" stroke-width="20" stroke-dasharray="0 377"
+              style="transition:stroke-dasharray 0.7s ease"/>
           </svg>
           <div class="donut-text">
             <div class="donut-pct" id="donut-pct">—</div>
             <div class="donut-sub">indexées</div>
           </div>
         </div>
-        <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div><span>Indexée</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div><span>Non indexée</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div><span>En attente</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div><span>Erreur</span></div>
-        </div>
-      </div>
-    </div>
 
-    <div class="card">
-      <div class="action-row">
-        <button class="btn" id="btn-check">&#128269; Vérifier tout</button>
-        <button class="btn btn-outline" id="btn-refresh">&#8635; Relancer</button>
-      </div>
-      <div class="notice" id="notice-text">
-        Configurez d'abord l'API Google en cliquant sur le badge en haut à droite. Gratuit, 100 vérifications/jour.
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-left">
+              <div class="legend-dot" style="background:var(--green)"></div>
+              <span>Indexées</span>
+            </div>
+            <span class="legend-count" style="color:var(--green)" id="leg-indexed">—</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-left">
+              <div class="legend-dot" style="background:var(--red)"></div>
+              <span>Non indexées</span>
+            </div>
+            <span class="legend-count" style="color:var(--red)" id="leg-not">—</span>
+          </div>
+        </div>
+
+        <div class="mini-bar-wrap" style="width:100%">
+          <div class="mini-bar-label">
+            <span>0%</span>
+            <span id="mini-pct-label">—%</span>
+            <span>100%</span>
+          </div>
+          <div class="mini-bar-bg">
+            <div class="mini-bar-fill" id="mini-bar" style="width:0%"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -453,7 +394,6 @@ function jsonp(cb, obj) {
 </div>
 
 <script>
-  // ── URLs pré-chargées ─────────────────────────────────────────────────────
   const PRELOADED = [
     ['https://meteomayenne.fr/sace','not-indexed'],
     ['https://meteomayenne.fr/saint-aignan-de-couptrain','not-indexed'],
@@ -534,338 +474,76 @@ function jsonp(cb, obj) {
     ['https://meteomayenne.fr/voutre','not-indexed'],
   ];
 
-  // ── Config ────────────────────────────────────────────────────────────────
-  let cfg = JSON.parse(localStorage.getItem('seo_cfg') || '{}');
-  // cfg: { scriptUrl }
+  const urls = PRELOADED.map(([url, status]) => ({ url, status }));
 
-  function hasApi() { return !!(cfg.scriptUrl); }
-  function saveCfg() { localStorage.setItem('seo_cfg', JSON.stringify(cfg)); }
+  let currentFilter = 'all';
 
-  function updateApiBadge() {
-    const badge  = document.getElementById('api-badge');
-    const label  = document.getElementById('api-label');
-    const notice = document.getElementById('notice-text');
-    if (hasApi()) {
-      badge.className  = 'api-badge ok';
-      label.textContent = 'Script connecté';
-      notice.innerHTML  = '<strong>Apps Script connecté.</strong> Cliquez une ligne pour vérifier manuellement sur Google.';
-    } else {
-      badge.className  = 'api-badge warn';
-      label.textContent = 'Script non configuré';
-      notice.innerHTML  = 'Cliquez sur ⚙ en haut pour configurer le script Google Apps — <strong>gratuit, sans limite</strong>.';
-    }
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
   }
 
-  // ── Modal ─────────────────────────────────────────────────────────────────
-  function openModal() {
-    document.getElementById('cfg-script-url').value = cfg.scriptUrl || '';
-    document.getElementById('modal').classList.add('open');
+  function slug(url) {
+    return url.replace('https://meteomayenne.fr/', '/');
   }
-  function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
-  document.getElementById('api-badge').addEventListener('click', openModal);
-  document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
-  document.getElementById('modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('modal')) closeModal();
-  });
-  document.getElementById('btn-modal-save').addEventListener('click', () => {
-    const scriptUrl = document.getElementById('cfg-script-url').value.trim();
-    if (!scriptUrl) { alert('Veuillez coller l\'URL du déploiement Apps Script.'); return; }
-    cfg = { scriptUrl };
-    saveCfg();
-    updateApiBadge();
-    closeModal();
-  });
+  function renderList() {
+    const list = document.getElementById('url-list');
+    const filtered = currentFilter === 'all' ? urls : urls.filter(u => u.status === currentFilter);
+    document.getElementById('list-count').textContent = filtered.length + ' pages';
 
-  document.getElementById('btn-copy-script').addEventListener('click', () => {
-    const code = document.getElementById('script-code').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-      const btn = document.getElementById('btn-copy-script');
-      btn.textContent = 'Copié ✓';
-      setTimeout(() => btn.textContent = 'Copier', 2000);
-    });
-  });
-
-  // ── State ─────────────────────────────────────────────────────────────────
-  let urls = JSON.parse(localStorage.getItem('seo_urls') || '[]');
-  let checking = false;
-
-  function save() { localStorage.setItem('seo_urls', JSON.stringify(urls)); }
-  function genId() { return Math.random().toString(36).slice(2); }
-
-  // ── Labels ────────────────────────────────────────────────────────────────
-  const STATUS_LABEL = {
-    pending:       '— En attente',
-    checking:      'Vérification…',
-    indexed:       '✓ Indexée',
-    'not-indexed': '✗ Non indexée',
-    error:         '⚠ Erreur API',
-  };
-
-  // ── Render ────────────────────────────────────────────────────────────────
-  function render() {
-    const list  = document.getElementById('url-list');
-    const empty = document.getElementById('empty-msg');
-    if (urls.length === 0) {
-      list.innerHTML = '';
-      list.appendChild(empty);
-      updateStats(); updateChart(); return;
+    if (filtered.length === 0) {
+      list.innerHTML = '<li class="empty-state">Aucune page dans cette catégorie.</li>';
+      return;
     }
     list.innerHTML = '';
-    urls.forEach(item => {
+    filtered.forEach(item => {
       const li = document.createElement('li');
-      li.className  = 'url-item ' + item.status;
-      li.dataset.id = item.id;
-      const dateStr = item.checkedAt ? `<span class="url-date">${item.checkedAt}</span>` : '';
-      li.innerHTML  = `
+      li.className = 'url-item ' + item.status;
+      li.title = item.url;
+      li.innerHTML = `
         <div class="status-dot"></div>
-        <span class="url-text" title="${item.url}">${item.url}</span>
-        ${dateStr}
-        <span class="url-label">${STATUS_LABEL[item.status] || '—'}</span>
+        <span class="url-slug">${slug(item.url)}</span>
+        <span class="url-badge">${item.status === 'indexed' ? '✓ Indexée' : '✗ Non indexée'}</span>
       `;
+      li.addEventListener('click', () => window.open(item.url, '_blank'));
       list.appendChild(li);
     });
-    updateStats(); updateChart();
   }
 
-  function renderItem(item) {
-    const li = document.querySelector(`[data-id="${item.id}"]`);
-    if (!li) { render(); return; }
-    li.className = 'url-item ' + item.status;
-    li.querySelector('.url-label').textContent = STATUS_LABEL[item.status] || '—';
-    const dateEl = li.querySelector('.url-date');
-    if (item.checkedAt) {
-      if (dateEl) dateEl.textContent = item.checkedAt;
-      else {
-        const span = document.createElement('span');
-        span.className = 'url-date';
-        span.textContent = item.checkedAt;
-        li.querySelector('.url-label').before(span);
-      }
-    }
-    updateStats(); updateChart();
-  }
-
-  // ── Stats ─────────────────────────────────────────────────────────────────
   function updateStats() {
     const total   = urls.length;
     const indexed = urls.filter(u => u.status === 'indexed').length;
     const notIdx  = urls.filter(u => u.status === 'not-indexed').length;
-    const pending = urls.filter(u => ['pending','checking','error'].includes(u.status)).length;
+    const pct     = total > 0 ? Math.round((indexed / total) * 100) : 0;
+
     document.getElementById('stat-total').textContent   = total;
     document.getElementById('stat-indexed').textContent = indexed;
     document.getElementById('stat-not').textContent     = notIdx;
-    document.getElementById('stat-pending').textContent = pending;
-  }
+    document.getElementById('stat-pct').textContent     = pct + '%';
+    document.getElementById('leg-indexed').textContent  = indexed;
+    document.getElementById('leg-not').textContent      = notIdx;
+    document.getElementById('mini-pct-label').textContent = pct + '%';
+    document.getElementById('mini-bar').style.width     = pct + '%';
 
-  // ── Donut chart ───────────────────────────────────────────────────────────
-  function updateChart() {
-    const C = 2 * Math.PI * 70;
-    const total   = urls.length;
-    const indexed = urls.filter(u => u.status === 'indexed').length;
-    const notIdx  = urls.filter(u => u.status === 'not-indexed').length;
-    const pctEl   = document.getElementById('donut-pct');
-    const dIdx    = document.getElementById('donut-indexed');
-    const dNot    = document.getElementById('donut-not');
+    const C = 2 * Math.PI * 60;
+    const idxArc = total > 0 ? (indexed / total) * C : 0;
+    const notArc = total > 0 ? (notIdx  / total) * C : 0;
 
-    if (total === 0 || indexed + notIdx === 0) {
-      dIdx.setAttribute('stroke-dasharray', `0 ${C}`);
-      dNot.setAttribute('stroke-dasharray', `0 ${C}`);
-      pctEl.textContent = '—'; return;
-    }
-    const pct = Math.round((indexed / (indexed + notIdx)) * 100);
-    pctEl.textContent = pct + '%';
-    const idxArc = (indexed / total) * C;
-    const notArc = (notIdx  / total) * C;
+    const dIdx = document.getElementById('donut-indexed');
+    const dNot = document.getElementById('donut-not');
     dIdx.setAttribute('stroke-dasharray', `${idxArc} ${C - idxArc}`);
-    dIdx.setAttribute('stroke-dashoffset', '0');
+    dIdx.setAttribute('stroke-dashoffset', `${-notArc}`);
     dNot.setAttribute('stroke-dasharray', `${notArc} ${C - notArc}`);
-    dNot.setAttribute('stroke-dashoffset', `-${idxArc}`);
+    dNot.setAttribute('stroke-dashoffset', '0');
+
+    document.getElementById('donut-pct').textContent = pct + '%';
   }
 
-  // ── Apps Script check via JSONP (bypasses CORS entirely) ─────────────────
-  function checkViaGoogleApi(pageUrl) {
-    if (!hasApi()) return Promise.resolve({ status: 'error' });
-
-    return new Promise(resolve => {
-      const cbName = '_seo_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-
-      const timer = setTimeout(() => {
-        cleanup();
-        showApiError('Timeout — vérifiez l\'URL du script dans ⚙');
-        resolve({ status: 'error' });
-      }, 25000);
-
-      function cleanup() {
-        clearTimeout(timer);
-        delete window[cbName];
-        const s = document.getElementById(cbName);
-        if (s) s.remove();
-      }
-
-      window[cbName] = data => {
-        cleanup();
-        if (data.status === 'indexed' || data.status === 'not-indexed') {
-          resolve(data);
-        } else {
-          showApiError(data.msg || 'Réponse inattendue du script');
-          resolve({ status: 'error' });
-        }
-      };
-
-      const script = document.createElement('script');
-      script.id  = cbName;
-      script.src = cfg.scriptUrl + '?url=' + encodeURIComponent(pageUrl) + '&callback=' + cbName;
-      script.onerror = () => {
-        cleanup();
-        showApiError('Script inaccessible — vérifiez l\'URL dans ⚙');
-        resolve({ status: 'error' });
-      };
-      document.head.appendChild(script);
-    });
-  }
-
-  function showApiError(msg) {
-    const notice = document.getElementById('notice-text');
-    notice.style.background  = 'rgba(255,92,114,0.1)';
-    notice.style.borderColor = 'rgba(255,92,114,0.3)';
-    notice.innerHTML = '⚠ <strong>Erreur :</strong> ' + msg +
-      '<br><small style="color:var(--muted)">Vérifiez l\'URL du script dans ⚙</small>';
-  }
-
-  // ── Check one URL ─────────────────────────────────────────────────────────
-  function todayStr() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  async function checkUrl(item) {
-    item.status = 'checking';
-    renderItem(item);
-    const result = await checkViaGoogleApi(item.url);
-    item.status = result.status === 'quota' ? 'error' : result.status;
-    if (result.status === 'quota') {
-      return 'quota';
-    }
-    item.checkedAt = todayStr();
-    renderItem(item);
-    save();
-    return 'ok';
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  function fmtTime(s) {
-    if (s < 60) return s + 's';
-    return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
-  }
-
-  // ── Check all ─────────────────────────────────────────────────────────────
-  const BATCH_SIZE  = 2;    // Google API is sensitive to bursts
-  const BATCH_DELAY = 600;  // ms between batches
-
-  async function checkAll(resetFirst = false) {
-    if (checking) return;
-    if (urls.length === 0) return;
-    if (!hasApi()) { openModal(); return; }
-
-    if (resetFirst) { urls.forEach(u => u.status = 'pending'); render(); }
-
-    checking = true;
-    document.getElementById('btn-check').disabled   = true;
-    document.getElementById('btn-refresh').disabled = true;
-
-    const toCheck = urls.filter(u => u.status === 'pending' || u.status === 'error');
-    const total   = toCheck.length;
-    if (total === 0) { finish(); return; }
-
-    const progressWrap  = document.getElementById('progress-wrap');
-    const progressBar   = document.getElementById('progress-bar');
-    const progressLabel = document.getElementById('progress-label');
-    const progressPct   = document.getElementById('progress-pct');
-    const progressEta   = document.getElementById('progress-eta');
-    progressWrap.style.display = 'block';
-    progressBar.style.width = '0%';
-
-    const startTime = Date.now();
-    let done = 0;
-    let quotaHit = false;
-
-    function updateProgress() {
-      const pct = Math.round((done / total) * 100);
-      progressBar.style.width = pct + '%';
-      progressPct.textContent = pct + '%';
-      progressLabel.textContent = `${done} / ${total} vérifiées`;
-      if (done > 0) {
-        const elapsed   = Date.now() - startTime;
-        const remaining = Math.ceil(((total - done) * elapsed / done) / 1000);
-        progressEta.textContent = remaining > 0 ? `Temps restant : ~${fmtTime(remaining)}` : '';
-      } else {
-        const est = Math.ceil((Math.ceil(total / BATCH_SIZE) * (BATCH_DELAY + 1200)) / 1000);
-        progressEta.textContent = `Durée estimée : ~${fmtTime(est)}`;
-      }
-    }
-    updateProgress();
-
-    outer:
-    for (let i = 0; i < toCheck.length; i += BATCH_SIZE) {
-      const batch = toCheck.slice(i, i + BATCH_SIZE);
-      const results = await Promise.all(batch.map(item => checkUrl(item)));
-      for (const r of results) {
-        if (r === 'quota') { quotaHit = true; break outer; }
-      }
-      done += batch.length;
-      updateProgress();
-      if (i + BATCH_SIZE < toCheck.length) {
-        await new Promise(r => setTimeout(r, BATCH_DELAY));
-      }
-    }
-
-    progressBar.style.width = '100%';
-    progressPct.textContent = '100%';
-    if (quotaHit) {
-      progressLabel.textContent = '⚠ Quota journalier atteint';
-      progressEta.textContent = 'Réessayez demain ou augmentez votre quota Google Cloud.';
-    } else {
-      progressLabel.textContent = 'Vérification terminée ✓';
-      progressEta.textContent = `Durée : ${fmtTime(Math.round((Date.now() - startTime) / 1000))}`;
-    }
-    setTimeout(() => {
-      progressWrap.style.display = 'none';
-      progressBar.style.width = '0%';
-    }, 4000);
-
-    finish();
-  }
-
-  function finish() {
-    checking = false;
-    document.getElementById('btn-check').disabled   = false;
-    document.getElementById('btn-refresh').disabled = false;
-  }
-
-  // ── Click URL → open Google ───────────────────────────────────────────────
-  document.getElementById('url-list').addEventListener('click', e => {
-    const li = e.target.closest('.url-item');
-    if (!li) return;
-    const item = urls.find(u => u.id === li.dataset.id);
-    if (item) window.open('https://www.google.com/search?q=site:' + encodeURIComponent(item.url), '_blank');
-  });
-
-  // ── Event listeners ───────────────────────────────────────────────────────
-  document.getElementById('btn-check').addEventListener('click',   () => checkAll(false));
-  document.getElementById('btn-refresh').addEventListener('click', () => checkAll(true));
-
-  // ── Init ──────────────────────────────────────────────────────────────────
-  // Merge PRELOADED entries into urls (skip duplicates, keep existing status)
-  const PRELOAD_DATE = '2026-05-22';
-  PRELOADED.forEach(([url, status]) => {
-    if (!urls.find(u => u.url === url)) {
-      urls.push({ id: genId(), url, status, checkedAt: PRELOAD_DATE });
-    }
-  });
-  save();
-
-  updateApiBadge();
-  render();
+  updateStats();
+  renderList();
 </script>
 </body>
 </html>
