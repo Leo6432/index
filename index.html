@@ -203,12 +203,22 @@
     .url-item:hover { background: var(--card2); border-color: var(--border); }
     .url-item.indexed     { border-left: 3px solid var(--green); }
     .url-item.not-indexed { border-left: 3px solid var(--red); }
+    .url-item.priority    { background: rgba(245,158,11,0.06); border-left: 3px solid #f59e0b !important; }
 
     .status-dot {
       width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
     }
     .indexed     .status-dot { background: var(--green); }
     .not-indexed .status-dot { background: var(--red); }
+
+    .btn-priority {
+      background: none; border: none; font-size: 1rem; cursor: pointer;
+      padding: 0 2px; line-height: 1; flex-shrink: 0;
+      color: var(--border); transition: color 0.15s, transform 0.15s;
+    }
+    .btn-priority:hover       { color: #f59e0b; transform: scale(1.2); }
+    .btn-priority.on          { color: #f59e0b; }
+    .tab.active.orange-tab    { border-bottom-color: #f59e0b; color: #f59e0b; }
 
     .url-slug {
       flex: 1;
@@ -356,6 +366,7 @@
       <button class="tab active"     data-filter="all"         onclick="setFilter('all',this)">Toutes</button>
       <button class="tab green-tab"  data-filter="indexed"     onclick="setFilter('indexed',this)">Indexées</button>
       <button class="tab red-tab"    data-filter="not-indexed" onclick="setFilter('not-indexed',this)">Non indexées</button>
+      <button class="tab orange-tab" data-filter="priority"    onclick="setFilter('priority',this)">⭐ Priorités</button>
     </div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
@@ -687,11 +698,14 @@
     ['https://meteomayenne.fr/brains-sur-les-marches','not-indexed'],
   ];
 
-  // Load overrides from localStorage, fall back to PRELOADED
-  const savedOverrides = JSON.parse(localStorage.getItem('seo_overrides') || '{}');
+  // Load overrides and priorities from localStorage, fall back to PRELOADED
+  const savedOverrides  = JSON.parse(localStorage.getItem('seo_overrides')  || '{}');
+  const savedPriorities = JSON.parse(localStorage.getItem('seo_priorities') || '[]');
+
   const urls = PRELOADED.map(([url, status]) => ({
     url,
-    status: savedOverrides[url] || status,
+    status:   savedOverrides[url] || status,
+    priority: savedPriorities.includes(url),
   }));
 
   function saveOverrides() {
@@ -700,11 +714,23 @@
     localStorage.setItem('seo_overrides', JSON.stringify(overrides));
   }
 
+  function savePriorities() {
+    localStorage.setItem('seo_priorities', JSON.stringify(
+      urls.filter(u => u.priority).map(u => u.url)
+    ));
+  }
+
   function toggleStatus(item) {
     item.status = item.status === 'indexed' ? 'not-indexed' : 'indexed';
     saveOverrides();
     renderList();
     updateStats();
+  }
+
+  function togglePriority(item) {
+    item.priority = !item.priority;
+    savePriorities();
+    renderList();
   }
 
   let currentFilter = 'all';
@@ -731,7 +757,9 @@
     const query = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     document.getElementById('search-clear').classList.toggle('visible', query.length > 0);
 
-    let filtered = currentFilter === 'all' ? urls : urls.filter(u => u.status === currentFilter);
+    let filtered = currentFilter === 'priority'
+      ? urls.filter(u => u.priority)
+      : currentFilter === 'all' ? urls : urls.filter(u => u.status === currentFilter);
     if (query) filtered = filtered.filter(u => u.url.toLowerCase().includes(query));
     document.getElementById('list-count').textContent = filtered.length + ' pages';
 
@@ -745,11 +773,17 @@
       li.className = 'url-item ' + item.status;
       li.title = 'Cliquer pour ouvrir — cliquer sur le badge pour changer le statut';
       const badgeLabel = item.status === 'indexed' ? '✓ Indexée' : '✗ Non indexée';
+      if (item.priority) li.classList.add('priority');
       li.innerHTML = `
+        <button class="btn-priority ${item.priority ? 'on' : ''}" title="${item.priority ? 'Retirer la priorité' : 'Marquer comme priorité'}">⭐</button>
         <div class="status-dot"></div>
         <span class="url-slug">${slug(item.url)}</span>
         <span class="url-badge" title="Cliquer pour basculer le statut">${badgeLabel}</span>
       `;
+      li.querySelector('.btn-priority').addEventListener('click', e => {
+        e.stopPropagation();
+        togglePriority(item);
+      });
       li.querySelector('.url-badge').addEventListener('click', e => {
         e.stopPropagation();
         toggleStatus(item);
