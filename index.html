@@ -228,6 +228,27 @@
     .indexed     .url-badge { background: rgba(0,212,170,0.12); color: var(--green); border-color: rgba(0,212,170,0.25); }
     .not-indexed .url-badge { background: rgba(255,92,114,0.12); color: var(--red);   border-color: rgba(255,92,114,0.25); }
 
+    /* ── Search ── */
+    .search-wrap {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+    .search-icon { color: var(--muted); font-size: 0.95rem; flex-shrink: 0; }
+    .search-wrap input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-size: 0.88rem;
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-clear {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 0.85rem; padding: 0 2px; line-height: 1;
+      display: none; transition: color 0.15s;
+    }
+    .search-clear:hover { color: var(--red); }
+    .search-clear.visible { display: block; }
+
     .empty-state {
       text-align: center; color: var(--muted); padding: 40px 0; font-size: 0.9rem;
     }
@@ -335,6 +356,11 @@
       <button class="tab active"     data-filter="all"         onclick="setFilter('all',this)">Toutes</button>
       <button class="tab green-tab"  data-filter="indexed"     onclick="setFilter('indexed',this)">Indexées</button>
       <button class="tab red-tab"    data-filter="not-indexed" onclick="setFilter('not-indexed',this)">Non indexées</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="search-input" placeholder="Rechercher une page…" oninput="renderList()" />
+      <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Effacer">✕</button>
     </div>
     <ul id="url-list">
       <li class="empty-state">Chargement…</li>
@@ -694,9 +720,19 @@
     return url.replace('https://meteomayenne.fr/', '/');
   }
 
+  function clearSearch() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-clear').classList.remove('visible');
+    renderList();
+  }
+
   function renderList() {
     const list = document.getElementById('url-list');
-    const filtered = currentFilter === 'all' ? urls : urls.filter(u => u.status === currentFilter);
+    const query = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+    document.getElementById('search-clear').classList.toggle('visible', query.length > 0);
+
+    let filtered = currentFilter === 'all' ? urls : urls.filter(u => u.status === currentFilter);
+    if (query) filtered = filtered.filter(u => u.url.toLowerCase().includes(query));
     document.getElementById('list-count').textContent = filtered.length + ' pages';
 
     if (filtered.length === 0) {
