@@ -777,7 +777,7 @@
       li.innerHTML = `
         <button class="btn-priority ${item.priority ? 'on' : ''}" title="${item.priority ? 'Retirer la priorité' : 'Marquer comme priorité'}">⭐</button>
         <div class="status-dot"></div>
-        <span class="url-slug">${slug(item.url)}</span>
+        <span class="url-slug" title="${item.priority ? '🔍 Vérifier sur Google : site:' + item.url : '🔗 Ouvrir ' + item.url}">${slug(item.url)}</span>
         <span class="url-badge" title="Cliquer pour basculer le statut">${badgeLabel}</span>
       `;
       li.querySelector('.btn-priority').addEventListener('click', e => {
@@ -788,7 +788,13 @@
         e.stopPropagation();
         toggleStatus(item);
       });
-      li.querySelector('.url-slug').addEventListener('click', () => window.open(item.url, '_blank'));
+      li.querySelector('.url-slug').addEventListener('click', () => {
+        if (item.priority) {
+          window.open('https://www.google.com/search?q=site:' + encodeURIComponent(item.url), '_blank');
+        } else {
+          window.open(item.url, '_blank');
+        }
+      });
       list.appendChild(li);
     });
   }
